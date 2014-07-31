@@ -248,11 +248,11 @@ function googleSearch-incognito()
 function googleImageSearch() { go "http://www.google.com/search?q=$(query $@)&safe=active&tbm=isch"            ; }
 function define()            { googleSearch "define:$(argClip "$@")"                ; }
 function wiki()              { googleSearch "site:en.wikipedia.org $(argClip "$@")" ; }
-function pt-to-en()          { "$BROWSER" 'https://translate.google.com/#pt/en/'"$(argClip "$1")" }
-function en-to-pt()          { "$BROWSER" 'https://translate.google.com/#en/pt/'"$(argClip "$1")" }
-function lds()               { go "http://www.lds.org/search?lang=eng&query=$(query $@)"                       ; }
+function pt-to-en()          { "$BROWSER" 'https://translate.google.com/#pt/en/'"$(argClip "$1")"; }
+function en-to-pt()          { "$BROWSER" 'https://translate.google.com/#en/pt/'"$(argClip "$1")"; }
+function lds()               { go "http://www.lds.org/search?lang=eng&query=$(query $@)" ; }
 function scriptures()        { go "http://www.lds.org/search?lang=eng&query=$(query $@)&collection=scriptures" ; }
-function cpp()               { googleSearch "site:cplusplus.com/ $(argClip "$@")"   ; }
+function cpp()               { googleSearch "site:cplusplus.com/ $(argClip "$@")" ; }
 
 # Got from alias.sh
 function html-header() { curl --head "$(argClip "$@")"; }
@@ -467,7 +467,7 @@ function cdr-integration     () { cdr "test/integration/$@";       }
 
 ##### Defaults
 function e()    { spawn "$EDITOR" "$(argClip "$@")"; }
-function bcal() { bc -l "$@";               }
+function bcal() { bc -l "$@"; }
 
 ##### Fork functions
 alias keepassx='spawn keepassx'

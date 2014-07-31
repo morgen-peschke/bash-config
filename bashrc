@@ -18,7 +18,7 @@ umask 0077
 # Check for an interactive session
 [ -z "$PS1" ] && return
 
-PATH="${HOME}/bash-config/bin:${PATH}"
+PATH="${HOME}/bin:${PATH}"
 export PATH
 
 ##############################
@@ -61,7 +61,7 @@ bind Space:magic-space
 ##############################
 
 if [[ "$(tty | cut -d'/' -f3 | head -c3)" != "tty" ]]; then
-    verse-current    
+    type verse-current >/dev/null 2>&1 && verse-current
     if [ -x ~/bin/list ]; then
 	echo '     ========= Notes ======== '
 	list
