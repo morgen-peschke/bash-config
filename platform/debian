@@ -35,6 +35,8 @@ fi
 ##############################
 ##############################
 
+setterm -blength 0
+
 # No-x numberlock fix
 TYPE=`tty | cut -d'/' -f3 | head -c3`
 if [[ "$TYPE" == "tty" ]]; then

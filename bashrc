@@ -31,23 +31,18 @@ export PATH
 
 # Source global
 [ -f /etc/bashrc ] && source /etc/bashrc
-
-# Source platform specific stuff
-[ -f ~/.bash-platform ] && source ~/.bash-platform
-
-# Source aliases
-[ -f ~/.bash-aliases ] && source ~/.bash-aliases
-
-# Source completions
 [ -f /etc/bash_completion ] && source /etc/bash_completion
 
-# Add custom completion functions
-if [ -d ~/.bash-completion-source/ ]; then
-   for i in ~/.bash-completion-source/*.bash; do source "$i"; done
+# Add completion functions
+if [ -d ~/.bash-config/completion-source/ ]; then
+   for i in ~/.bash-config/completion-source/*.bash; do source "$i"; done
 fi
 
-# Source custom completions
-[ -f ~/.bash-completions ] && source ~/.bash-completions
+# Source secondary configuration files
+for i in current-platform aliases completions
+do
+    [ -f "${HOME}/.bash-config/${i}" ] && source "${HOME}/.bash-config/${i}"
+done
 
 # Source RVM configuration
 [ -f ~/.profile ] && . ~/.profile
