@@ -1,0 +1,112 @@
+# -*- Shell-script -*-
+
+##############################
+##############################
+##
+## Environmental Variables
+##
+##############################
+##############################
+
+PATH="/usr/local/etc/emacs24/bin:${PATH}"
+
+export EMACS='/usr/local/etc/emacs24/bin/emacs'
+export EMACSCLIENT='/usr/local/etc/emacs24/bin/emacsclient'
+export EMACS_SOCKET="/tmp/emacs-server-$(id -u)/server"
+
+# Set browser
+if [ -n "$DISPLAY" ]; then
+    export BROWSER="chromium"
+else
+    export BROWSER="lynx"
+fi
+# Set browser
+if [ -n "$DISPLAY" ]; then
+    export BROWSER="chromium"
+else
+    export BROWSER="lynx"
+fi
+
+##############################
+##############################
+##
+## Fix stuff that bugs me
+##
+##############################
+##############################
+
+# No-x numberlock fix
+TYPE=`tty | cut -d'/' -f3 | head -c3`
+if [[ "$TYPE" == "tty" ]]; then
+    setleds +num
+fi
+
+##############################
+##############################
+##
+## Utility Functions
+##
+##############################
+##############################
+
+function apt-clean()
+
+    echo '+----------------------------------------------------------+';
+    echo '|      Purging automatically installed orphan packages     |';
+    echo '+----------------------------------------------------------+';
+    sudo apt-get --purge autoremove;
+    echo;
+    echo '+----------------------------------------------------------+';
+    echo '|               Purging other orphan packages              |';
+    echo '+----------------------------------------------------------+';
+    sudo apt-get remove $(deborphan);
+    echo;
+    echo '+----------------------------------------------------------+';
+    echo '|               Purging orphaned config files              |';
+    echo '+----------------------------------------------------------+';
+    sudo aptitude purge ~c;
+    echo '+----------------------------------------------------------+';
+    echo '|               Purging cache of install files             |';
+    echo '+----------------------------------------------------------+';
+    sudo apt-get autoclean
+}
+
+##############################
+##############################
+##
+## Spawn New Terminal
+##
+##############################
+##############################
+
+function spawnterm()
+{
+    "$@"
+    if [ -n "$DISPLAY" ]; then
+        local cmd="$HOME/bin/eval-alias $@"
+
+        ( ( gnome-terminal \
+            --working-directory "$(pwd)" \
+            --title="$*" \
+            -e "$cmd" \
+            2>/dev/null >/dev/null & ) & )
+    else
+        "$@"
+    fi
+}
+
+function spawnless()
+{
+    # If the first arg is a non-executable file, then we assume that it's
+    # supposed to be passed directly to less.
+    if [ ! -x "$1" ]; then
+        spawnterm "less $@";
+    else
+        spawnterm "$@|less";
+    fi
+}
+function sl() { spawnless "$@"; }
+function st() { spawnterm "$@"; }
+complete -cf spawnterm
+complete -cf st
+

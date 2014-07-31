@@ -1,0 +1,500 @@
+# -*- Shell-script -*-
+##############################
+##############################
+##
+## Set environmental variables
+##
+##############################
+##############################
+
+# A simple prompt
+PS1='[\u@\h \W]\$ '
+
+# Misc bash settings
+export HISTCONTROL=ignoredups:ignorespace
+set echo-control-characters off
+shopt -s expand_aliases
+
+# Set default editor
+export EDITOR="eclient"
+export VISUAL="eclient"
+
+# fix the incorrect terminal specifications
+#export TERM=xterm-256color
+
+# Completion settings
+complete -cf sudo
+complete -cf ssudo
+complete -cf man
+complete -cf until
+
+# Auto coloring
+alias ls='ls --color=auto'
+alias lh='ls -lh'
+alias ll='ls -l'
+alias la='ls -A'
+alias less='less -R'
+alias rgrep='grep -R'
+alias grep='grep -n --color=auto'
+export GREP_COLORS='mt=0;34'
+
+##############################
+##############################
+##
+## Utility Functions
+##
+##############################
+##############################
+function abspath ()
+{
+    echo "$(cd $(dirname "$@"); pwd -P)/$(basename "$@")"
+}
+
+function tarball ()
+{
+    local FILE
+    for FILE in "${@}"
+    do
+        echo "===== Creating Tarball of $FILE ====="
+        if tar cvvjf "${FILE%%/}.tbz2" "$FILE"; then
+            echo "> Success"
+            echo "> Removing old copy of $FILE"
+            rm -rf "$FILE"
+
+        else
+            echo "> Failure"
+            rm -f "${FILE%%/}.tbz2"
+
+        fi
+   done
+}
+
+# Based on sample from alias.sh
+function extract ()
+{
+    local FILE
+    for FILE in "${@}"
+    do
+        if [ -f "$FILE" ] ; then
+            case "$FILE" in
+                *.tar.bz2) tar xvjf      "$FILE" ;;
+                *.tar.gz)  tar xvzf      "$FILE" ;;
+                *.bz2)     bunzip2 -v    "$FILE" ;;
+                *.rar)     unrar x -v    "$FILE" ;;
+                *.gz)      gunzip  -v    "$FILE" ;;
+                *.tar)     tar xvf       "$FILE" ;;
+                *.tbz2)    tar xvjf      "$FILE" ;;
+                *.tgz)     tar xvzf      "$FILE" ;;
+                *.zip)     unzip  -v     "$FILE" ;;
+                *.7z)      7z x          "$FILE" ;;
+                *)
+                    echo "'$FILE' cannot be extracted via extract"
+                    ;;
+            esac
+        else
+            echo "'$FILE' is not a valid file"
+        fi
+    done
+}
+
+function mid()
+{
+    local start="$1"
+    local end="$2"
+    local file="$3"
+
+    [ ! "$file" ] && file='-'
+
+    tail -n+"$start" "$file" | head -n"$end"
+}
+
+function line-nums() { nl -ba "$@"; }
+
+# Based on a directory size alias on alias.sh
+# Converts bytes into higher-order representations
+function human-number()
+{
+    local size;
+    local unit;
+    for size in "$@"
+    do
+        for unit in {k,M,G,T,P,E,Z,Y}
+        do
+            if [ "$size" -lt 1024 ]; then
+                echo "${size}${unit}"
+                break
+            fi
+            size=$(( size / 1024 ))
+        done
+    done
+}
+
+# Based off a sample found on commandlinefu.com
+function find-duplicates ()
+{
+    find "$@" -not -empty -type f -printf "%s\0"                  | \
+        sort -rnz                                                 | \
+        uniq -dz                                                  | \
+        xargs -0 -I{} -n1 -P0 find "$@" -type f -size {}c -print0 | \
+        xargs -0 -n1 -P0 md5sum                                   | \
+        sort                                                      | \
+        uniq -w32 --all-repeated=separate
+}
+
+# Prints the top 20 disk space hogs in the current directory
+function dirsize ()
+{
+    local root="$1/";
+    [ ! "$1" ] && root='.'
+
+    find "$root" -maxdepth 1 -not -name '.' -print0 | # Find all files in the directory
+                                                      # in $root, except '.' (we don't
+                                                      # need totals). Separate each file
+                                                      # name with a null terminator.
+    xargs -0 -r -n1 -P0 du -0 -sh | # Run each file through du to get a human
+                                    # readable summary size. Keep null as the
+                                    # separator. Run 1 du instance per file, but
+                                    # run as many in parallel as possible. This
+                                    # will speed things up considerably as it is
+                                    # mostly IO calls
+    sort -hz       | # Sort by human-readable numbers, keeping null as the separator.
+    tr   '\0' '\n' | # Change the nulls to newlines for easy reading.
+    tail -n20      | # Only show the top 20 offenders
+    sed 's|\./||'    # Remove the annoying ./ in front of the file names
+}
+
+##############################
+##############################
+##
+## Functions for cleaning up
+## input
+##
+##############################
+##############################
+
+alias cleanxml='xmllint --format -'
+alias cleanhtml='xmllint --html --format -'
+alias cleanjson='python -mjson.tool'
+
+##############################
+##############################
+##
+## Functions for background
+## spawning
+##
+##############################
+##############################
+function spawn()
+{
+    ( ( "$@" 2>/dev/null >/dev/null & ) & )
+}
+
+function s()  { spawn "$@";     }
+
+
+# Completion for background forks
+complete -cf spawn
+complete -cf s
+
+##############################
+##############################
+##
+## Command line web search
+##
+##############################
+##############################
+
+# Helper function to web encode a string
+function webSafe()
+{ echo "$@" | xxd -plain | tr -d '\n' | sed 's/\(..\)/%\1/g'; }
+
+# Get the contents of the clipboard if there are no passed arguments
+function argClip()
+{
+    local target="$@"
+    if [ ! "$target" ]; then
+        target="$(xpaste)"
+    fi
+    echo "$target"
+}
+
+# Search argument capture
+function query()
+{ webSafe "$(argClip "$@")"; }
+
+function force-url()
+{
+    if [[ "$@" =~ '^https?://' ]]; then
+        echo "$@"
+    else
+        echo 'https://'"$(sed -re 's_^.*?://__' <<< "$@")"
+    fi
+}
+
+# Open url
+function go()
+{ "$BROWSER" "$(force-url "$(argClip "$@")")" ; }
+
+function go-incognito()
+{ "$BROWSER" "$(argClip "$@")" ; }
+
+# Various search engines / options
+function googleSearch()
+{ "$BROWSER" "http://www.google.com/search?q=$(query $@)"            ; }
+
+function googleSearch-incognito()
+{ go-incognito  "http://www.google.com/search?q=$(query $@)" ; }
+
+function googleImageSearch() { go "http://www.google.com/search?q=$(query $@)&safe=active&tbm=isch"            ; }
+function define()            { googleSearch "define:$(argClip "$@")"                ; }
+function wiki()              { googleSearch "site:en.wikipedia.org $(argClip "$@")" ; }
+function pt-to-en()          { "$BROWSER" 'https://translate.google.com/#pt/en/'"$(argClip "$1")" }
+function en-to-pt()          { "$BROWSER" 'https://translate.google.com/#en/pt/'"$(argClip "$1")" }
+function lds()               { go "http://www.lds.org/search?lang=eng&query=$(query $@)"                       ; }
+function scriptures()        { go "http://www.lds.org/search?lang=eng&query=$(query $@)&collection=scriptures" ; }
+function cpp()               { googleSearch "site:cplusplus.com/ $(argClip "$@")"   ; }
+
+# Got from alias.sh
+function html-header() { curl --head "$(argClip "$@")"; }
+
+##############################
+##############################
+##
+## Git/hub
+##
+##############################
+##############################
+alias gci='git commit'
+alias gco='git checkout'
+
+alias grb='git rebase -p'
+alias girb='git rebase -i'
+alias grb-abort='git rebase --abort'
+alias grb-continue='git rebase --continue'
+alias grb-skip='git rebase --skip'
+
+alias gbr='git branch'
+alias gbr-name='git-branch'
+alias gbr-upstream='git push --set-upstream origin "$(git-branch)"'
+
+alias gbr-delete='git branch -D'
+function gbr-delete-upstream () {
+    local branches=()
+    for b in "$@"; do
+        branches+=(":$b")
+    done
+
+    git push origin "${branches[@]}"
+}
+function gbr-delete-completely () {
+    for b in "$@"; do
+        git branch -D "$b"
+        gbr-delete-upstream "$b"
+    done
+}
+
+alias gmerge='git merge --no-ff'
+
+alias gpull='git pull --rebase'
+alias gpush='git push origin "HEAD:$(git-branch)"'
+
+alias gadd='git add'
+alias grm='git rm'
+
+alias glog='git log'
+alias gstash-push='git stash && git stash list'
+alias gstash-pop='git stash pop && git stash list'
+alias gstash-list='git stash list'
+alias gstat='git status'
+alias gdiff='git diff --ignore-space-at-eol'
+alias gshow='git show --ignore-space-at-eol'
+
+alias git-refresh='git fetch origin && git rebase -p "$(git-branch)"'
+
+function git-branch() {
+    git symbolic-ref HEAD 2>/dev/null | sed -e 's/refs\/heads\///'
+}
+
+function git-root() (
+    # Mostly comes from here:
+    # https://github.com/Dieterbe/git-scripts/commit/3b7be5e25052e99d9be8ca7d9e6d5c91f8c2a14a
+    if [ -n "$1" ]; then
+        if [ -d "$1" ]; then
+            cd "$1"
+        else
+            cd "$(dirname "$1")"
+        fi
+    fi
+
+    local rel_dir="$(git rev-parse --show-cdup)"
+    if git rev-parse --show-cdup >/dev/null 2>/dev/null; then
+        readlink -f ./"$rel_dir"
+    else
+        return 1
+    fi
+)
+
+function git-retag() {
+    local root=$(git-root)
+    if [ -n "$root" ]; then
+        ( cd "$root" && ctags -a -e -f TAGS --tag-relative -R app lib vendor )
+    else
+        return 1
+    fi
+}
+
+function github() {
+    local url=$(git config --get remote.origin.url | \
+        sed \
+        -e 's_git@_https://_' \
+        -e 's_\.com:_.com/_' \
+        -e 's_\.git$__')
+
+    if [ "x$url" != "x" ]; then
+        go "${url}/tree/$(gbr-name)"
+    else
+        go "https://github.com/morgen-peschke?tab=repositories"
+    fi
+}
+
+##############################
+##############################
+##
+## Rails Helpers
+##
+##############################
+##############################
+alias rake='rake -t'
+
+function rails-resque-pool () {
+    resque-pool "$(git-root)/config/resque-pool.yml"
+}
+
+alias rails-test-units="rake test:units"
+alias rails-test-functionals="rake test:functionals"
+alias rails-test-integration="rake test:integration"
+
+function rails-test-single () {
+    if [ -z "$1" ]; then
+        echo 'rails-test-one <test_file.rb> <function_name>'
+    else
+        local file=
+        local test=
+        if [ -f "$1" ]; then
+            file="$1"
+            if [ -n "$2" ]; then
+                test="$2"
+            fi
+        else
+            test="$1"
+            file="$(ag -l --nocolor --column "def ${test}")"
+            local matches="$(wc -l <<< "$file")"
+
+            if [ "x$matches" != "x1" ]; then
+                echo "Test ${test} found in multiple files"
+                return 1
+            fi
+
+            if [ ! -f "$file" ]; then
+                echo "Test ${test} not found"
+                return 1
+            fi
+        fi
+
+        if [ -n "$test" ]; then
+            ruby -I "$(git-root)/test/" "$file" -n "$test"
+        else
+            ruby -I "$(git-root)/test/" "$file"
+        fi
+    fi
+}
+
+function rails-db-migration-last () (
+    cdr-migrate && ls | tail -n1
+)
+
+function rails-db-migration-last-timestamp () {
+    rails-last-migration | cut -d_ -f1
+}
+
+function rails-db-migrate-to-file () {
+    rake -t db:migrate VERSION="$(argClip "$@" | cut -d_ -f1)"
+}
+
+function rails-db-migration-redo () {
+    rake -t db:migrate:redo VERSION="$1"
+}
+
+function cd-in-rails() {
+    local root="$(git-root)"
+    if [ -n "$root" ]; then
+        cd "$(cd "$root/$@" && pwd)"
+    else
+        return 1
+    fi
+}
+alias cdr="cd-in-rails"
+
+function cdr-config          () { cdr "config";                    }
+function cdr-script          () { cdr "script";                    }
+function cdr-lib             () { cdr "lib";                       }
+
+function cdr-app             () { cdr "app/$@";                    }
+function cdr-controllers     () { cdr "app/controllers/$@";        }
+function cdr-models          () { cdr "app/models/$@";             }
+function cdr-helpers         () { cdr "app/helpers/$@";            }
+function cdr-views           () { cdr "app/views/$@";              }
+function cdr-workers         () { cdr "app/workers/$@";            }
+function cdr-assets          () { cdr "app/assets/$@";             }
+function cdr-javascripts     () { cdr "app/assets/javascripts/$@"; }
+function cdr-stylesheets     () { cdr "app/assets/stylesheets/$@"; }
+
+function cdr-db              () { cdr "db/$@";                     }
+function cdr-migrate         () { cdr "db/migrate/$@";             }
+
+function cdr-test            () { cdr "test/$@";                   }
+function cdr-unit            () { cdr "test/unit/$@";              }
+function cdr-functional      () { cdr "test/functional/$@";        }
+function cdr-integration     () { cdr "test/integration/$@";       }
+
+##############################
+##############################
+##
+## Aliases
+##
+##############################
+##############################
+
+##### Defaults
+function e()    { spawn "$EDITOR" "$(argClip "$@")"; }
+function bcal() { bc -l "$@";               }
+
+##### Fork functions
+alias keepassx='spawn keepassx'
+
+function sman()  { st man "$@";    }
+function shelp() { sl help "$@";   }
+function sinfo() { st info "$@";   }
+
+##### Web functiones
+alias docs='open drive.google.com'
+alias gcal='open https://www.google.com/calendar/'
+alias gmail='open https://mail.google.com'
+alias gplus='open https://plus.google.com'
+
+alias g='googleSearch'
+alias gi='googleSearch-incognito'
+alias goi='go-incognito'
+
+alias weather='go "http://www.weather.com/weather/today/83440"'
+alias weathernow='go "http://www.weather.com/weather/right-now/83440"'
+
+##### Lazy functiones
+alias cl='cleanout'
+
+function today()     { date +"%Y%m%d"  ; }
+function todaynice() { date +"%Y/%m/%d"; }
+
+alias simpleServer='python -m SimpleHTTPServer'
+
+function dropsudo() { sudo -k "$@"; }

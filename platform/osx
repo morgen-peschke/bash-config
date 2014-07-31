@@ -1,0 +1,68 @@
+# -*- Shell-script -*-
+##############################
+##############################
+##
+## Environmental Variables 
+##
+##############################
+##############################
+
+COREUTILS_PREFIX="$(brew --prefix coreutils)"
+BREW_PREFIX="$(brew --prefix)"
+
+PATH="$HOME/bin:$COREUTILS_PREFIX/libexec/gnubin:/usr/local/bin:$PATH"
+export PATH
+
+MANPATH="$COREUTILS/libexec/gnuman:$MANPATH"
+
+# Set emacs versions
+export EMACS='/usr/local/Cellar/emacs/24.3/Emacs.app/Contents/MacOS/Emacs'
+export EMACSCLIENT='/usr/local/Cellar/emacs/24.3/bin/emacsclient'
+export EMACS_SOCKET="/tmp/emacs-server-$(id -u)/server"
+
+# Set browser
+if [ -n "$DISPLAY" ]; then
+    export BROWSER="open -a /Applications/Google\ Chrome.app"
+else
+    export BROWSER="open"
+fi
+
+##############################
+##############################
+##
+## Fix stuff that bugs me
+##
+##############################
+##############################
+
+function send() {
+    local target_app="$1"
+    shift
+    osascript ~/work/ctm-helper-scripts/misc-scripts/send-text.scpt \
+        "$target_app" "$(argClip "$@")"
+}
+
+##############################
+##############################
+##
+## Services
+##
+##############################
+##############################
+alias elasticsearch="sudo /usr/local/share/elasticsearch/bin/elasticsearch -f"
+
+function launchctl-reload()
+{
+    launchctl unload "$@" && launchctl load "$@"
+}
+
+##############################
+##############################
+##
+## Aliases
+##
+##############################
+##############################
+alias ag-literal='ag -Q'
+alias xcopy='pbcopy'
+alias xpaste='pbpaste'
