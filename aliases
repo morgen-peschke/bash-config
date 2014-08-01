@@ -269,16 +269,16 @@ alias gco='git checkout'
 
 alias grb='git rebase -p'
 alias girb='git rebase -i'
-alias grb-abort='git rebase --abort'
-alias grb-continue='git rebase --continue'
+alias grb-abrt='git rebase --abort'
+alias grb-cont='git rebase --continue'
 alias grb-skip='git rebase --skip'
 
 alias gbr='git branch'
 alias gbr-name='git-branch'
-alias gbr-upstream='git push --set-upstream origin "$(git-branch)"'
+alias gbr-set-remote='git push --set-upstream origin "$(git-branch)"'
 
-alias gbr-delete='git branch -D'
-function gbr-delete-upstream () {
+function gbr-delete-local  () { git branch -D "$@"; }
+function gbr-delete-remote () {
     local branches=()
     for b in "$@"; do
         branches+=(":$b")
@@ -288,8 +288,8 @@ function gbr-delete-upstream () {
 }
 function gbr-delete-completely () {
     for b in "$@"; do
-        git branch -D "$b"
-        gbr-delete-upstream "$b"
+        gbr-delete-local "$b"
+        gbr-delete-remote "$b"
     done
 }
 
@@ -315,27 +315,8 @@ function git-branch() {
     git symbolic-ref HEAD 2>/dev/null | sed -e 's/refs\/heads\///'
 }
 
-function git-root() (
-    # Mostly comes from here:
-    # https://github.com/Dieterbe/git-scripts/commit/3b7be5e25052e99d9be8ca7d9e6d5c91f8c2a14a
-    if [ -n "$1" ]; then
-        if [ -d "$1" ]; then
-            cd "$1"
-        else
-            cd "$(dirname "$1")"
-        fi
-    fi
-
-    local rel_dir="$(git rev-parse --show-cdup)"
-    if git rev-parse --show-cdup >/dev/null 2>/dev/null; then
-        readlink -f ./"$rel_dir"
-    else
-        return 1
-    fi
-)
-
 function git-retag() {
-    local root=$(git-root)
+    local root=$(git root)
     if [ -n "$root" ]; then
         ( cd "$root" && ctags -a -e -f TAGS --tag-relative -R app lib vendor )
     else
@@ -367,7 +348,7 @@ function github() {
 alias rake='rake -t'
 
 function rails-resque-pool () {
-    resque-pool "$(git-root)/config/resque-pool.yml"
+    resque-pool "$(git root)/config/resque-pool.yml"
 }
 
 alias rails-test-units="rake test:units"
@@ -402,9 +383,9 @@ function rails-test-single () {
         fi
 
         if [ -n "$test" ]; then
-            ruby -I "$(git-root)/test/" "$file" -n "$test"
+            ruby -I "$(git root)/test/" "$file" -n "$test"
         else
-            ruby -I "$(git-root)/test/" "$file"
+            ruby -I "$(git root)/test/" "$file"
         fi
     fi
 }
@@ -426,7 +407,7 @@ function rails-db-migration-redo () {
 }
 
 function cd-in-rails() {
-    local root="$(git-root)"
+    local root="$(git root)"
     if [ -n "$root" ]; then
         cd "$(cd "$root/$@" && pwd)"
     else

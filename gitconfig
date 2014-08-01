@@ -1,0 +1,13 @@
+[user]
+	name = morgen-peschke
+	email = morgen.peschke@gmail.com
+[core]
+	editor = eclient
+[credential]
+	helper = cache
+[alias]
+	unstage = reset HEAD --
+	root = !pwd
+	fix-whitespace = rebase --whitespace=fix
+[color]
+	ui = auto
