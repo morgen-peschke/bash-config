@@ -231,17 +231,6 @@ function force-url()
     fi
 }
 
-# Open url
-function go()
-{ "$BROWSER" "$(force-url "$(argClip "$@")")" ; }
-
-function go-incognito()
-{ "$BROWSER" "$(argClip "$@")" ; }
-
-# Various search engines / options
-function googleSearch()
-{ "$BROWSER" "http://www.google.com/search?q=$(query $@)"            ; }
-
 function googleSearch-incognito()
 { go-incognito  "http://www.google.com/search?q=$(query $@)" ; }
 

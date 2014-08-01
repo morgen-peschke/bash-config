@@ -115,6 +115,24 @@ complete -cf st
 ##############################
 ##############################
 ##
+## CLI Searching
+##
+##############################
+##############################
+# Open url
+function go()
+{ spawn "$BROWSER" "$(force-url "$(argClip "$@")")" ; }
+
+function go-incognito()
+{ spawn "$BROWSER" "$(argClip "$@")" ; }
+
+# Various search engines / options
+function googleSearch()
+{ spawn "$BROWSER" "http://www.google.com/search?q=$(query $@)"            ; }
+
+##############################
+##############################
+##
 ## Aliases
 ##
 ##############################
