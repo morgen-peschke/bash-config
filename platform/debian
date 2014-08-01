@@ -112,3 +112,12 @@ function st() { spawnterm "$@"; }
 complete -cf spawnterm
 complete -cf st
 
+##############################
+##############################
+##
+## Aliases
+##
+##############################
+##############################
+alias xcopy='xclip --selection=clipboard -i'
+alias xpaste='xclip --selection=clipboard -o'
