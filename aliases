@@ -447,10 +447,10 @@ function shelp() { sl help "$@";   }
 function sinfo() { st info "$@";   }
 
 ##### Web functiones
-alias docs='open drive.google.com'
-alias gcal='open https://www.google.com/calendar/'
-alias gmail='open https://mail.google.com'
-alias gplus='open https://plus.google.com'
+alias docs='go drive.google.com'
+alias cal='go https://www.google.com/calendar/'
+alias gmail='go https://mail.google.com'
+alias gplus='go https://plus.google.com'
 
 alias g='googleSearch'
 alias gi='googleSearch-incognito'
