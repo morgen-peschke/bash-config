@@ -447,8 +447,8 @@ function shelp() { sl help "$@";   }
 function sinfo() { st info "$@";   }
 
 ##### Web functiones
-alias docs='go drive.google.com'
-alias cal='go https://www.google.com/calendar/'
+alias gdocs='go drive.google.com'
+alias gcal='go https://www.google.com/calendar/'
 alias gmail='go https://mail.google.com'
 alias gplus='go https://plus.google.com'
 
@@ -456,8 +456,8 @@ alias g='googleSearch'
 alias gi='googleSearch-incognito'
 alias goi='go-incognito'
 
-alias weather='go "http://www.weather.com/weather/today/83440"'
-alias weathernow='go "http://www.weather.com/weather/right-now/83440"'
+alias weather='go "http://www.weather.com/weather/today/95037"'
+alias weathernow='go "http://www.weather.com/weather/right-now/95037"'
 
 ##### Lazy functiones
 alias ag-literal='ag -Q'
