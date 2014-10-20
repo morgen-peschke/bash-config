@@ -1,1 +1,5 @@
-PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+
+# .bash_profile
+
+# Get the aliases and functions
+[ -f "${HOME}/.bash-config/bashrc" ] && source "${HOME}/.bash-config/bashrc"

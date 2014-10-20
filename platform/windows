@@ -1,0 +1,59 @@
+# -*- Shell-script -*-
+
+##############################
+##############################
+##
+## Environmental Variables
+##
+##############################
+##############################
+
+export EMACS='/cygdrive/c/Emacs/bin/emacs'
+export EMACSCLIENT='/cygdrive/c/Emacs/bin/emacsclientw'
+export EMACS_SOCKET="/tmp/emacs-server-$(id -u)/server"
+
+function cd-dev-folder () {
+    cd /cygdrive/c/SerialTek
+}
+function winpath () {
+    cygpath -w "$@"
+}
+function open () {
+    cmd.exe /c start "$@"
+}
+function e () {
+    emacsclientw "$@"
+}
+
+##############################
+##############################
+##
+## CLI Searching
+##
+##############################
+##############################
+# Open url
+function go()
+{ open "$(force-url "$(argClip "$@")")" ; }
+
+function go-incognito()
+{ open "$(argClip "$@")" ; }
+
+# Various search engines / options
+function googleSearch()
+{ open "http://www.google.com/search?q=$(query $@)"            ; }
+
+#########################################
+##                                      #
+## Misc                                 #
+##                                      #
+#########################################
+
+##############################
+##############################
+##
+## Aliases
+##
+##############################
+##############################
+alias xcopy='clip'
