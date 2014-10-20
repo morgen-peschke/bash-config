@@ -44,9 +44,6 @@ do
     [ -f "${HOME}/.bash-config/${i}" ] && source "${HOME}/.bash-config/${i}"
 done
 
-# Source RVM configuration
-[ -f ~/.profile ] && . ~/.profile
-
 bind Space:magic-space
 # Dynamically expand history commands
 # http://samrowe.com/wordpress/advancing-in-the-bash-shell/
