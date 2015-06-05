@@ -16,13 +16,7 @@ export EMACS_SOCKET="/tmp/emacs-server-$(id -u)/server"
 
 # Set browser
 if [ -n "$DISPLAY" ]; then
-    export BROWSER="chromium"
-else
-    export BROWSER="lynx"
-fi
-# Set browser
-if [ -n "$DISPLAY" ]; then
-    export BROWSER="chromium"
+    export BROWSER="chromium-browser"
 else
     export BROWSER="lynx"
 fi
@@ -35,12 +29,11 @@ fi
 ##############################
 ##############################
 
-setterm -blength 0
-
-# No-x numberlock fix
+# Only in virtual consoles
 TYPE=`tty | cut -d'/' -f3 | head -c3`
 if [[ "$TYPE" == "tty" ]]; then
-    setleds +num
+    setterm -blength 0 # Turn off the system beep
+    setleds +num       # Number-Lock fix
 fi
 
 ##############################
