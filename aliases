@@ -436,7 +436,7 @@ function cdr-integration     () { cdr "test/integration/$@";       }
 ##############################
 
 ##### Defaults
-function e()    { spawn "$EDITOR" "$(argClip "$@")"; }
+function e()    { spawn "$EDITOR" "$@"; }
 function bcal() { bc -l "$@"; }
 
 ##### Fork functions
