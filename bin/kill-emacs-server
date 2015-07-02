@@ -1,0 +1,4 @@
+#!/bin/bash
+if ps aux | grep -v 'grep' | grep 'emacs --daemon'; then
+    eclient -e '(kill-emacs)'
+fi

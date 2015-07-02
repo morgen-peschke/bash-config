@@ -1,0 +1,6 @@
+#!/bin/bash
+cmd=("$@")
+
+. ~/.bashrc
+
+eval "$(printf '%q ' "${cmd[@]}")"

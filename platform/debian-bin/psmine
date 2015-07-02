@@ -1,0 +1,9 @@
+#!/bin/bash
+
+ARG="$@"
+
+if [ ! "$ARG" ]; then
+    ARG='.'
+fi
+
+ps -U $USER -u $USER -o pid,start_time,tty,cmd | grep "$ARG" | grep -v "$0" | grep -v "ps -U $USER" | grep -v grep

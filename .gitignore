@@ -1,6 +1,7 @@
 # -*- mode: gitignore; -*-
 *~
 current-platform
+current-platform-bin
 \#*\#
 /.emacs.desktop
 /.emacs.desktop.lock

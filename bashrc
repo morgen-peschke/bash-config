@@ -18,7 +18,7 @@ umask 0077
 # Check for an interactive session
 [ -z "$PS1" ] && return
 
-PATH="${HOME}/bin:${PATH}:${HOME}/.cask/bin"
+PATH="${HOME}/.bash-config/bin:${HOME}/.bash-config/current-platform-bin:${HOME}/bin:${PATH}:${HOME}/.cask/bin"
 export PATH
 
 ##############################

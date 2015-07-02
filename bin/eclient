@@ -1,0 +1,11 @@
+#!/bin/bash
+args="-a= -s $EMACS_SOCKET"
+
+xprop -name "$EMACS" &>/dev/null
+[ "$?" = "1" ] && args="$args -c"
+
+if [ "$1" ]; then
+    "$EMACSCLIENT" $args "$@"
+else
+    "$EMACSCLIENT" $args -ne '(switch-to-buffer "*scratch*")'
+fi

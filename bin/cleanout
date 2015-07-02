@@ -1,0 +1,35 @@
+#!/bin/bash
+for i in {'*~','a.out','*.o','*.gch','*nppdf32Log*'}
+do
+    echo "Files matching: $i"
+
+    FILES=()
+    while read -rd '' file
+    do
+        FILES+=("$file")
+        echo "  $file"
+    done < <(find "$@" -depth -iname "$i" -print0)
+
+    if [ "x${FILES[*]}" != "x" ]; then
+
+        CONFIRM=""
+        until [ "$CONFIRM" == 'y' ] || [ "$CONFIRM" == 'n' ]
+        do
+            read -ep "    Delete [y/n]: " CONFIRM
+            CONFIRM=$(echo "$CONFIRM" | tr [:upper:] [:lower:])
+        done
+
+        if [ "x$CONFIRM" == 'xy' ]; then
+            for file in "${FILES[@]}"
+            do
+                if rm "$file"; then
+                    echo "    OK: $file"
+                else
+                    echo "    FAIL: $file"
+                fi
+            done
+        else
+            echo "   Skipping"
+        fi
+    fi
+done
