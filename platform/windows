@@ -11,6 +11,7 @@
 export EMACS='/cygdrive/c/Emacs/bin/emacs'
 export EMACSCLIENT='/cygdrive/c/Emacs/bin/emacsclientw'
 export EMACS_SOCKET="/tmp/emacs-server-$(id -u)/server"
+export GIT_EDITOR="${HOME}/.bash-config/platform/windows-bin/git-editor"
 
 function winpath () {
     cygpath -w "$@"
