@@ -16,6 +16,7 @@ export GIT_EDITOR="${HOME}/.bash-config/platform/windows-bin/git-editor"
 function winpath () {
     cygpath -w "$@"
 }
+
 function open () {
     local arguments=()
     if [ -z "$1" ]; then
@@ -31,8 +32,9 @@ function open () {
     fi
     cmd.exe /c start "${arguments[@]}"
 }
+
 function e () {
-    emacsclientw "$@"
+    "$EMACSCLIENT" "$@"
 }
 
 ##############################
