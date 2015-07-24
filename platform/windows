@@ -16,7 +16,19 @@ function winpath () {
     cygpath -w "$@"
 }
 function open () {
-    cmd.exe /c start "$@"
+    local arguments=()
+    if [ -z "$1" ]; then
+        arguments+=(".")
+    else
+        for arg in "$@"; do
+            if [ -a "${arg}" ]; then
+                arguments+=("$(winpath "${arg}")")
+            else
+                arguments+=("${arg}")
+            fi
+        done
+    fi
+    cmd.exe /c start "${arguments[@]}"
 }
 function e () {
     emacsclientw "$@"
