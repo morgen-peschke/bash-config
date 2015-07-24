@@ -37,6 +37,16 @@ function e () {
     "$EMACSCLIENT" "$@"
 }
 
+function ewin () {
+    local args=()
+    for x in "$@"; do args+=("$(winpath "$x")"); done
+    e "${args[@]}"
+}
+
+function open-dev-command-prompt () {
+     cmd.exe /k 'C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\VsDevCmd.bat'
+}
+
 ##############################
 ##############################
 ##
