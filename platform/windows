@@ -12,9 +12,6 @@ export EMACS='/cygdrive/c/Emacs/bin/emacs'
 export EMACSCLIENT='/cygdrive/c/Emacs/bin/emacsclientw'
 export EMACS_SOCKET="/tmp/emacs-server-$(id -u)/server"
 
-function cd-dev-folder () {
-    cd /cygdrive/c/SerialTek
-}
 function winpath () {
     cygpath -w "$@"
 }
