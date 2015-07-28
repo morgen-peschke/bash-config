@@ -1,0 +1,8 @@
+#!/bin/bash
+args="-s $EMACS_SOCKET"
+
+if [ "$1" ]; then
+	"$EMACSCLIENT" $args "$@"
+else
+	"$EMACSCLIENT" $args -ne '(switch-to-buffer "*scratch*")'
+fi
