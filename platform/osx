@@ -16,8 +16,8 @@ export PATH
 MANPATH="$COREUTILS/libexec/gnuman:$MANPATH"
 
 # Set emacs versions
-export EMACS='/usr/local/Cellar/emacs/24.3/Emacs.app/Contents/MacOS/Emacs'
-export EMACSCLIENT='/usr/local/Cellar/emacs/24.3/bin/emacsclient'
+export EMACS='/Applications/Emacs.app/Contents/MacOS/Emacs'
+export EMACSCLIENT='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient'
 export EMACS_SOCKET="/tmp/emacs-server-$(id -u)/server"
 
 # Set browser
