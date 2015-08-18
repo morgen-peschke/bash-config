@@ -255,7 +255,7 @@ function html-header() { curl --head "$(argClip "$@")"; }
 ##############################
 alias gci='git commit'
 alias gco='git checkout'
-
+alias gamend='git commit --amend'
 alias grb='git rebase -p'
 alias girb='git rebase -i'
 alias grb-abrt='git rebase --abort'
