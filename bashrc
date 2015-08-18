@@ -39,7 +39,7 @@ if [ -d ~/.bash-config/completion-source/ ]; then
 fi
 
 # Source secondary configuration files
-for i in completions aliases current-platform
+for i in completions aliases current-platform local-rc
 do
     [ -f "${HOME}/.bash-config/${i}" ] && source "${HOME}/.bash-config/${i}"
 done
