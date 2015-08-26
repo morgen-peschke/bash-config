@@ -7,5 +7,5 @@ xprop -name "$EMACS" &>/dev/null
 if [ "$1" ]; then
     "$EMACSCLIENT" $args "$@"
 else
-    "$EMACSCLIENT" $args -ne '(switch-to-buffer "*scratch*")'
+    "$EMACSCLIENT" $args -ne '(mpeschke/goto-or-create-untitled-buffer)'
 fi
