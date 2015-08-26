@@ -1,4 +1,26 @@
 #!/bin/bash
+
+function confirmDeletion() {
+    local confirm=""
+    until [ "x$confirm" == 'xy' ] || [ "x$confirm" == 'xn' ]
+    do
+        read -ep "    Delete [y/n]: " confirm
+        confirm=$(echo "$confirm" | tr [:upper:] [:lower:])
+    done
+    [ "x$confirm" == 'xy' ]
+}
+
+function deleteWithConfirmation() {
+    for file in "${@}"
+    do
+        if rm "$file"; then
+            echo "    OK: $file"
+        else
+            echo "    FAIL: $file"
+        fi
+    done
+}
+
 for i in {'*~','a.out','*.o','*.gch','*nppdf32Log*'}
 do
     echo "Files matching: $i"
@@ -12,22 +34,8 @@ do
 
     if [ "x${FILES[*]}" != "x" ]; then
 
-        CONFIRM=""
-        until [ "$CONFIRM" == 'y' ] || [ "$CONFIRM" == 'n' ]
-        do
-            read -ep "    Delete [y/n]: " CONFIRM
-            CONFIRM=$(echo "$CONFIRM" | tr [:upper:] [:lower:])
-        done
-
-        if [ "x$CONFIRM" == 'xy' ]; then
-            for file in "${FILES[@]}"
-            do
-                if rm "$file"; then
-                    echo "    OK: $file"
-                else
-                    echo "    FAIL: $file"
-                fi
-            done
+        if confirmDeletion; then
+            deleteWithConfirmation "${FILES[@]}"
         else
             echo "   Skipping"
         fi
