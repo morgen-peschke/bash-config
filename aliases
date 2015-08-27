@@ -460,7 +460,7 @@ alias weather='go "http://www.weather.com/weather/today/95037"'
 alias weathernow='go "http://www.weather.com/weather/right-now/95037"'
 
 ##### Lazy functiones
-alias ag-literal='ag -Q'
+alias ag-literal='ag -Qs'
 alias cl='cleanout'
 
 function today()     { date +"%Y%m%d"  ; }
