@@ -9,7 +9,9 @@
 	unstage = reset HEAD --
 	root = !pwd
         fix-whitespace = rebase --whitespace=fix
-	lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+        lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+        show-changed-files = show --summary --name-only
+        log-changed-files = log --summary --name-only
 [color]
 	ui = auto
 [push]
