@@ -163,6 +163,19 @@ function dirsize ()
     sed 's|\./||'    # Remove the annoying ./ in front of the file names
 }
 
+# List 10 commands with the most open file descriptors
+function open-descriptors-by-command ()
+{
+    lsof -n |
+        tail -n+2 |
+        sed -E 's/ +/ /g' |
+        cut -d' ' -f1 |
+        sort |
+        uniq -c |
+        sort -n |
+        tail
+}
+
 ##############################
 ##############################
 ##
