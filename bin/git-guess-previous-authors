@@ -1,0 +1,86 @@
+#!/bin/bash
+
+TARGET_REVISION="$1"
+
+function prefixWith() {
+    while read line
+    do
+        echo "$@" "$line"
+    done
+}
+
+function getChangedFilesWithHash() {
+    git show --name-only --pretty=format: "$1" | prefixWith "$1"
+}
+
+function diffRangeToSequence() {
+    local start="$1"
+    if [ "$start" = "0" ]; then
+        return
+    fi
+
+    shift
+    if [[ "x$1" = "x" ]]; then
+        echo "$start"
+    else
+        local end="$1"
+        if [ "$end" = "0" ]; then
+            return
+        elif [ "$end" != "1" ]; then
+            end="$((end - 1))"
+        fi
+        echo "$start"
+        echo "$((start + end))"
+    fi
+}
+
+function diffLineToRange() {
+    for p in "$@"
+    do
+        diffRangeToSequence $(tr ',' ' ' <<< "$p")
+    done | sort -nu
+}
+
+function extractLineNumbers() {
+    cut -d'@' -f3  |
+        tr -d '+-' |
+        while read line
+        do
+            local range=$(diffLineToRange $line)
+            echo "$(head -n1 <<< "$range"),$(tail -n1 <<< "$range")"
+        done
+}
+
+function getLinesFromDiff() {
+    git show -U0 "$1" -- "$2" | grep '^@@' | extractLineNumbers
+}
+
+function getChangedLines() {
+    while read line
+    do
+        getLinesFromDiff $line | prefixWith $line
+    done
+}
+
+function getPreviousAuthors() {
+    while read line
+    do
+        local args=($line)
+        local hash="${args[0]}"
+        local file="${args[1]}"
+        local range="${args[2]}"
+
+        git log "${hash}^" -L"${range}:${file}" \
+            --pretty=format:AUTHOR:%an \
+            --name-only 2>/dev/null |
+            \grep '^AUTHOR:' |
+            cut -d':' -f2-
+
+    done | sort | uniq -c | sort -nr
+}
+
+cd "./$(git rev-parse --show-cdup)"
+
+getChangedFilesWithHash "$TARGET_REVISION" |
+    getChangedLines |
+    getPreviousAuthors

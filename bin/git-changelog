@@ -1,0 +1,29 @@
+#! /bin/bash
+
+AUTHOR="Morgen"
+
+function commits-for-date () {
+    GIT_PAGER=cat git log --author="$AUTHOR" \
+             --since="$1 00:00:00" \
+             --until="$1 24:00:00" \
+             --format="%H"
+}
+
+function format-commits () {
+    while read commit
+    do
+        GIT_PAGER=cat git show $commit --format="  %h %s" -s
+        GIT_PAGER=cat git show $commit --format="%b" -s | sed 's/^/    /'
+    done
+}
+
+echo "CHANGELOG"
+echo ----------------------
+git log --format="%cd" --date=short --author="$AUTHOR" "$@" |
+    sort -u -r |
+    while read DATE
+    do
+        echo
+        echo [$DATE]
+        commits-for-date "$DATE" | format-commits
+    done
