@@ -35,11 +35,11 @@ fi
 ##############################
 ##############################
 
-function send() {
-    local target_app="$1"
-    shift
-    osascript ~/work/ctm-helper-scripts/misc-scripts/send-text.scpt \
-        "$target_app" "$(argClip "$@")"
+function flush-dns-cach () {
+    echo "Flushing dscacheutil and killing mDNSResponder"
+    sudo dscacheutil -flushcache
+    sudo killall -HUP mDNSResponder
+    echo "DNS flushed"
 }
 
 ##############################
