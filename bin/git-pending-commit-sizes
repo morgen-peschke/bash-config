@@ -1,0 +1,49 @@
+#!/bin/bash
+
+function human-number () {
+    local size;
+    local unit;
+    for size in "$@";
+    do
+        for unit in {b,k,M,G,T,P,E,Z,Y};
+        do
+            if [ "$size" -lt 1024 ]; then
+                echo "${size}${unit}";
+                break;
+            fi;
+            size=$(( size / 1024 ));
+        done;
+    done
+}
+
+function getPendingCommitHashes () {
+    git log origin/master..HEAD --format=%H
+}
+
+function getCommitSize () {
+    while read sha
+    do
+        local total=$(getBlobHashesFor "$sha" | getBlobSizes | sum)
+        local name=$(git show -s --pretty=oneline "$sha")
+        echo "$total bytes ($(human-number $total)) $name"
+    done
+}
+
+function getBlobHashesFor () {
+    git diff-tree -r -c -M -C --no-commit-id "$1" | cut -d' ' -f4
+}
+
+function getBlobSizes () {
+    git cat-file --batch-check | cut -d' ' -f3
+}
+
+function sum () {
+    local total=0
+    while read line
+    do
+        total=$((total + line))
+    done
+    echo $total
+}
+
+getPendingCommitHashes | getCommitSize
