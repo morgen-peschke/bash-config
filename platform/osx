@@ -14,6 +14,7 @@ PATH="$HOME/bin:$COREUTILS_PREFIX/libexec/gnubin:/usr/local/bin:$PATH"
 export PATH
 
 MANPATH="$COREUTILS/libexec/gnuman:$MANPATH"
+export MANPATH
 
 # Set emacs versions
 export EMACS='/Applications/Emacs.app/Contents/MacOS/Emacs'
