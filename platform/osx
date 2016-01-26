@@ -8,12 +8,13 @@
 ##############################
 
 COREUTILS_PREFIX="$(brew --prefix coreutils)"
+FINDUTILS_PREFIX="$(brew --prefix findutils)"
 BREW_PREFIX="$(brew --prefix)"
 
-PATH="$HOME/bin:$COREUTILS_PREFIX/libexec/gnubin:/usr/local/bin:$PATH"
+PATH="$HOME/bin:$COREUTILS_PREFIX/libexec/gnubin:$FINDUTILS_PREFIX/libexec/gnubin:/usr/local/bin:/usr/local/sbin:$PATH"
 export PATH
 
-MANPATH="$COREUTILS/libexec/gnuman:$MANPATH"
+MANPATH="$COREUTILS_PREFIX/libexec/gnuman:$FINDUTILS_PREFIX/libexec/gnuman:$MANPATH"
 export MANPATH
 
 # Set emacs versions
