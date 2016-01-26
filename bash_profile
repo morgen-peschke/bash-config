@@ -1,3 +1,4 @@
+# -*- Shell-script -*-
 # .bash_profile
 
 # Get the aliases and functions
