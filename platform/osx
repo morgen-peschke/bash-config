@@ -68,3 +68,4 @@ function launchctl-reload()
 
 alias xcopy='pbcopy'
 alias xpaste='pbpaste'
+alias lockscreen='pmset displaysleepnow'
