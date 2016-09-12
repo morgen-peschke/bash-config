@@ -477,6 +477,7 @@ alias weathernow='go "http://www.weather.com/weather/right-now/95037"'
 
 ##### Lazy functiones
 alias ag-literal='ag -Qs'
+alias ag-unicode='ag "[\x80-\xFF]"'
 alias cl='cleanout'
 
 function today()     { date +"%Y%m%d"  ; }
