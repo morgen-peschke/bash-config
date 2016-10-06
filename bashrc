@@ -13,7 +13,8 @@
 ##############################
 
 # Fix WAY too permissive umask
-umask 0077
+# https://blogs.gentoo.org/mgorny/2011/10/18/027-umask-a-compromise-between-security-and-simplicity/
+umask 0027
 
 # Check for an interactive session
 [ -z "$PS1" ] && return
