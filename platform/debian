@@ -10,8 +10,8 @@
 
 PATH="/usr/local/etc/emacs24/bin:${PATH}"
 
-export EMACS='/usr/local/etc/emacs24/bin/emacs'
-export EMACSCLIENT='/usr/local/etc/emacs24/bin/emacsclient'
+export EMACS='emacs'
+export EMACSCLIENT='emacsclient'
 export EMACS_SOCKET="/tmp/emacs-server-$(id -u)/server"
 
 # Set browser
