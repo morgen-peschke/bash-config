@@ -297,7 +297,8 @@ function gbr-delete-completely () {
 
 alias gmerge='git merge --no-ff'
 
-alias gpull='git pull --rebase'
+alias gpull='git pull'
+alias gpullr='git pull --rebase'
 alias gpush='git push origin "HEAD:$(git-branch)"'
 
 alias gadd='git add'
