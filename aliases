@@ -278,27 +278,14 @@ alias grb-cont='git rebase --continue'
 alias grb-skip='git rebase --skip'
 
 alias gbr='git branch'
+alias gbr-stat='git branch -vv'
+alias gbr-create='git checkout -b --track'
 alias gbr-name='git-branch'
-alias gbr-set-remote='git push --set-upstream origin "$(git-branch)"'
-
-function gbr-delete-local  () { git branch -D "$@"; }
-function gbr-delete-remote () {
-    local branches=()
-    for b in "$@"; do
-        branches+=(":$b")
-    done
-
-    git push origin "${branches[@]}"
-}
-function gbr-delete-completely () {
-    for b in "$@"; do
-        gbr-delete-local "$b"
-        gbr-delete-remote "$b"
-    done
-}
+alias gbr-set-remote='git branch --set-upstream-to=origin/"$(git-branch)"'
 
 alias gmerge='git merge --no-ff'
 
+alias gfetch='git fetch -p'
 alias gpull='git pull'
 alias gpullr='git pull --rebase'
 alias gpush='git push origin "HEAD:$(git-branch)"'
@@ -307,14 +294,9 @@ alias gadd='git add'
 alias grm='git rm'
 
 alias glog='git log'
-alias gstash-push='git stash && git stash list'
-alias gstash-pop='git stash pop && git stash list'
-alias gstash-list='git stash list'
 alias gstat='git status'
 alias gdiff='git diff --ignore-space-at-eol'
 alias gshow='git show --ignore-space-at-eol'
-
-alias git-refresh='git fetch origin && git rebase -p "$(git-branch)"'
 
 function git-branch() {
     git symbolic-ref HEAD 2>/dev/null | sed -e 's/refs\/heads\///'
