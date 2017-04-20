@@ -267,6 +267,7 @@ function html-header() { curl --head "$(argClip "$@")"; }
 ##
 ##############################
 ##############################
+
 alias gci='git commit'
 alias gco='git checkout'
 alias gamend='git commit --amend'
@@ -349,6 +350,7 @@ function github() {
 ##
 ##############################
 ##############################
+
 alias rake='rake -t'
 
 function rails-resque-pool () {
