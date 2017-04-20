@@ -429,6 +429,36 @@ function cdr-integration     () { cdr "test/integration/$@";       }
 ##############################
 ##############################
 ##
+## SBT
+##
+##############################
+##############################
+
+function sbt.linters () {
+    sbt.scoverage # Has to be done first as it requires a clean & test run
+    sbt.scapegoat
+}
+
+function sbt.scapegoat () {
+    # `scapegoatClean' is done separately as a check to ensure we're in a
+    # directory which has both sbt and scapegoat
+    sbt scapegoatClean && {
+        sbt scapegoat
+        local results_file="$(find -name scapegoat.html)"
+        [ -n "$results_file" ] && "$BROWSER" "$results_file"
+    }
+}
+
+function sbt.scoverage () {
+    sbt clean test coverageReport && {
+        local results_dir="$(find -name scoverage-report)"
+        [ -n "$results_dir" ] && "$BROWSER" "$results_dir/index.html"
+    }
+}
+
+##############################
+##############################
+##
 ## Aliases
 ##
 ##############################
