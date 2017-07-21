@@ -435,25 +435,44 @@ function cdr-integration     () { cdr "test/integration/$@";       }
 ##############################
 
 function sbt.linters () {
-    sbt.scoverage # Has to be done first as it requires a clean & test run
-    sbt.scapegoat
+    sbt.scoverage "$@"
+    sbt.scapegoat "$@"
 }
 
 function sbt.scapegoat () {
     # `scapegoatClean' is done separately as a check to ensure we're in a
     # directory which has both sbt and scapegoat
     sbt scapegoatClean && {
-        sbt scapegoat
-        local results_file="$(find -name scapegoat.html)"
-        [ -n "$results_file" ] && "$BROWSER" "$results_file"
+        if [ -n "$1" ]; then
+            for project in "$@"; do
+                sbt "$project"/scapegoat
+            done
+        else
+            sbt scapegoat
+        fi
+        find -name scapegoat.html -execdir "$BROWSER" '{}' \;
     }
 }
 
 function sbt.scoverage () {
-    sbt clean test coverageReport && {
-        local results_dir="$(find -name scoverage-report)"
-        [ -n "$results_dir" ] && "$BROWSER" "$results_dir/index.html"
-    }
+    if [ -n "$1" ]; then
+        for project in "$@"; do
+            sbt coverage "$project"/test "$project"/coverageReport
+        done
+    else
+        sbt coverage test coverageReport
+    fi
+    sbt.scoverage.open-reports "$@"
+}
+
+function sbt.scoverage.open-reports () {
+    if [ -n "$1" ]; then
+        for project in "$@"; do
+            find "$project" -name "scoverage-report" -execdir "$BROWSER" '{}'/index.html \;
+        done
+    else
+        find -name "scoverage-report" -execdir "$BROWSER" '{}'/index.html \;
+    fi
 }
 
 ##############################
