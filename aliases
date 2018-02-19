@@ -478,6 +478,33 @@ function sbt.scoverage.open-reports () {
 ##############################
 ##############################
 ##
+## Atlassian Products
+##
+##############################
+##############################
+
+function atlassian.url-to-crucible-link.args () {
+    for url
+    do
+        printf '[%s|%s]\n' "$(basename "$url")" "$url"
+    done
+}
+
+function atlassian.url-to-crucible-link () {
+    if [ "$1" ]; then
+        atlassian.url-to-crucible-link.args "$@"
+    else
+        while read -r line
+        do
+            atlassian.url-to-crucible-link.args "$line"
+        done
+    fi
+}
+
+
+##############################
+##############################
+##
 ## Aliases
 ##
 ##############################
