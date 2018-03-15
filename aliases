@@ -491,13 +491,14 @@ function atlassian.url-to-crucible-link.args () {
 }
 
 function atlassian.url-to-crucible-link () {
-    if [ "$1" ]; then
-        atlassian.url-to-crucible-link.args "$@"
-    else
-        while read -r line
+    if [ "$1" = "-" ]; then
+        local line
+        while IFS= read -r line || [[ -n "$line" ]]
         do
             atlassian.url-to-crucible-link.args "$line"
         done
+    else
+        atlassian.url-to-crucible-link.args "$@"
     fi
 }
 
