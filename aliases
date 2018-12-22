@@ -502,6 +502,49 @@ function atlassian.url-to-crucible-link () {
     fi
 }
 
+##############################
+##############################
+##
+## Markdown
+##
+##############################
+##############################
+
+function markdown.url-to-link.args () {
+    for url
+    do
+        printf '[%s](%s)\n' "$(basename "$url")" "$url"
+    done
+}
+
+function markdown.url-to-link () {
+    if [ "$1" = "-" ]; then
+        local line
+        while IFS= read -r line || [[ -n "$line" ]]
+        do
+            markdown.url-to-link.args "$line"
+        done
+    else
+        markdown.url-to-link.args "$@"
+    fi
+}
+
+##############################
+##############################
+##
+## S3
+##
+##############################
+##############################
+
+function combine-file-starting-with () {
+    local target="$1"
+
+    find "$(dirname "$target")" \
+         -type f \
+         -name "$(basename "$target")"'*' \
+         -execdir cat {} \;
+}
 
 ##############################
 ##############################
