@@ -1,4 +1,4 @@
-# -*- Shell-script -*-
+# -*- shell-script -*-
 ##############################
 ##############################
 ##
@@ -67,7 +67,7 @@ function tarball ()
             rm -f "${FILE%%/}.tbz2"
 
         fi
-   done
+    done
 }
 
 # Based on sample from alias.sh
@@ -149,19 +149,19 @@ function dirsize ()
     [ ! "$1" ] && root='.'
 
     find "$root" -maxdepth 1 -not -name '.' -print0 | # Find all files in the directory
-                                                      # in $root, except '.' (we don't
-                                                      # need totals). Separate each file
-                                                      # name with a null terminator.
-    xargs -0 -r -n1 -P0 du -0 -sh | # Run each file through du to get a human
-                                    # readable summary size. Keep null as the
-                                    # separator. Run 1 du instance per file, but
-                                    # run as many in parallel as possible. This
-                                    # will speed things up considerably as it is
-                                    # mostly IO calls
-    sort -hz       | # Sort by human-readable numbers, keeping null as the separator.
-    tr   '\0' '\n' | # Change the nulls to newlines for easy reading.
-    tail -n20      | # Only show the top 20 offenders
-    sed 's|\./||'    # Remove the annoying ./ in front of the file names
+        # in $root, except '.' (we don't
+        # need totals). Separate each file
+        # name with a null terminator.
+        xargs -0 -r -n1 -P0 du -0 -sh | # Run each file through du to get a human
+        # readable summary size. Keep null as the
+        # separator. Run 1 du instance per file, but
+        # run as many in parallel as possible. This
+        # will speed things up considerably as it is
+        # mostly IO calls
+        sort -hz       | # Sort by human-readable numbers, keeping null as the separator.
+        tr   '\0' '\n' | # Change the nulls to newlines for easy reading.
+        tail -n20      | # Only show the top 20 offenders
+        sed 's|\./||'    # Remove the annoying ./ in front of the file names
 }
 
 # List 10 commands with the most open file descriptors
@@ -313,10 +313,10 @@ function git-retag() {
 
 function github() {
     local url=$(git config --get remote.origin.url | \
-        sed \
-        -e 's_git@_https://_' \
-        -e 's_\.com:_.com/_' \
-        -e 's_\.git$__')
+                    sed \
+                        -e 's_git@_https://_' \
+                        -e 's_\.com:_.com/_' \
+                        -e 's_\.git$__')
 
     if [ "x$url" != "x" ]; then
         go "${url}/tree/$(gbr-name)"
