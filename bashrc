@@ -22,7 +22,7 @@ umask 0027
 PATH="${HOME}/.bash-config/bin:${HOME}/.bash-config/current-platform-bin:${HOME}/bin:${PATH}:${HOME}/.cask/bin"
 export PATH
 
-export SBT_OPTS="-XX:MaxMetaspaceSize=512m -Xms2G -Xmx2G -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Duser.timezone=GMT"
+export SBT_OPTS="-XX:MaxMetaspaceSize=1024m -Xms2G -Xmx2G -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Duser.timezone=GMT"
 
 ##############################
 ##############################
