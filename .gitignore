@@ -9,7 +9,7 @@ current-platform-bin
 auto-save-list
 tramp
 .\#*
-
+.DS_Store
 # Org-mode
 .org-id-locations
 *_archive
