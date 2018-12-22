@@ -1,0 +1,20 @@
+def remove(f):
+  . | walk(
+      if type == "object" then
+          with_entries(select(.value | f))
+      elif type == "array" then
+          map(select(. | f))
+      else
+          .
+      end
+  );
+
+def remove_empty:
+  . | remove(
+    . != null and
+    . != []   and
+    . != {}   and
+    . != ""
+  );
+
+def remove_nulls: . | remove(. != null);
