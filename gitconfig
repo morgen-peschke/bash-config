@@ -13,7 +13,6 @@
         lola = log --graph --all --pretty=format:'%C(red)%h%C(reset) %C(blue)%<(12)%ar%C(reset) %C(auto)%d %s'
         show-changed-files = show --summary --name-only
         log-changed-files = log --summary --name-only
-        serve = daemon --reuseaddr --base-path=. --export-all --verbose
 [color]
 	ui = auto
 [push]

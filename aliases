@@ -280,15 +280,14 @@ alias grb-skip='git rebase --skip'
 alias gbr='git branch'
 alias gbr-stat='git branch -vv'
 alias gbr-create='git checkout -b --track'
-alias gbr-name='git-branch'
-alias gbr-set-remote='git branch --set-upstream-to=origin/"$(git-branch)"'
+alias gbr-set-remote='git branch --set-upstream-to=origin/"$(git.branch)"'
 
 alias gmerge='git merge --no-ff'
 
 alias gfetch='git fetch -p'
 alias gpull='git pull'
 alias gpullr='git pull --rebase'
-alias gpush='git push origin "HEAD:$(git-branch)"'
+alias gpush='git push origin "HEAD:$(git.branch)"'
 
 alias gadd='git add'
 alias grm='git rm'
@@ -298,11 +297,11 @@ alias gstat='git status'
 alias gdiff='git diff --ignore-space-at-eol'
 alias gshow='git show --ignore-space-at-eol'
 
-function git-branch() {
+function git.branch() {
     git symbolic-ref HEAD 2>/dev/null | sed -e 's/refs\/heads\///'
 }
 
-function git-retag() {
+function git.retag() {
     local root=$(git root)
     if [ -n "$root" ]; then
         ( cd "$root" && ctags -a -e -f TAGS --tag-relative -R app lib vendor )
@@ -311,7 +310,7 @@ function git-retag() {
     fi
 }
 
-function github() {
+function git.github() {
     local url=$(git config --get remote.origin.url | \
                     sed \
                         -e 's_git@_https://_' \
@@ -319,10 +318,19 @@ function github() {
                         -e 's_\.git$__')
 
     if [ "x$url" != "x" ]; then
-        go "${url}/tree/$(gbr-name)"
+        go "${url}/tree/$(git.branch)"
     else
         go "https://github.com/morgen-peschke?tab=repositories"
     fi
+}
+
+function git.serve () {
+    git daemon --reuseaddr --base-path=. --export-all --verbose --informative-errors
+}
+
+# Note: cannot write to current server branch
+function git.serve.writable () {
+    git daemon --reuseaddr --base-path=. --export-all --verbose --informative-errors --enable=receive-pack
 }
 
 ##############################
