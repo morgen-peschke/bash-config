@@ -40,7 +40,7 @@ fi
 
 # Prevent Java CLI apps from appearing in the Dock
 # https://stackoverflow.com/a/34323476
-export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Dapple.awt.UIElement=true"
+#export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Dapple.awt.UIElement=true"
 
 function flush-dns-cach () {
     echo "Flushing dscacheutil and killing mDNSResponder"
