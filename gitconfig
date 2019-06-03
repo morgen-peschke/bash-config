@@ -4,8 +4,6 @@
 [core]
 	editor = eclient
         pager = less -S
-[credential]
-	helper = cache
 [alias]
 	unstage = reset HEAD --
 	root = !pwd
@@ -17,3 +15,5 @@
 	ui = auto
 [push]
 	default = simple
+[credential]
+	helper = store
