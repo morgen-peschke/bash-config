@@ -565,9 +565,6 @@ function combine-file-starting-with () {
 ##############################
 ##############################
 
-##### Behavior fixes
-alias scala='rlwrap scala -Xnojline'
-
 ##### Defaults
 function e()    { spawn "$EDITOR" "$@"; }
 function bcal() { bc -l "$@"; }
