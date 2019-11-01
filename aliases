@@ -523,6 +523,21 @@ function markdown.url-to-link () {
     done
 }
 
+##############################
+##############################
+##
+## Misc Conversions
+##
+##############################
+##############################
+
+function uuid.str-to-hex-literal () {
+    local line
+    while IFS= read -r line || [[ -n "$line" ]]
+    do
+        echo -n '0x'
+        tr -d '-' <<< "$line"
+    done
 }
 
 ##############################
