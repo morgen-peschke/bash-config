@@ -491,23 +491,20 @@ function sbt.scoverage.open-reports () {
 ##############################
 ##############################
 
-function atlassian.url-to-crucible-link.args () {
-    for url
+function atlassian.url-to-crucible-link () {
+    local url
+    while IFS= read -r url || [[ -n "$url" ]]
     do
-        printf '[%s|%s]\n' "$(basename "$url")" "$url"
+        printf '[%s|%s]\n' "$(basename "$url" | cut -d'?' -f1)" "$url"
     done
 }
 
-function atlassian.url-to-crucible-link () {
-    if [ "$1" = "-" ]; then
-        local line
-        while IFS= read -r line || [[ -n "$line" ]]
-        do
-            atlassian.url-to-crucible-link.args "$line"
-        done
-    else
-        atlassian.url-to-crucible-link.args "$@"
-    fi
+function atlassian.url-to-crucible-link.jira-comment () {
+    local url
+    while IFS= read -r url || [[ -n "$url" ]]
+    do
+        printf '[Comment %s|%s]\n' "$(basename "$url" | cut -d'#' -f2 | cut -d- -f2)" "$url"
+    done
 }
 
 ##############################
@@ -518,23 +515,14 @@ function atlassian.url-to-crucible-link () {
 ##############################
 ##############################
 
-function markdown.url-to-link.args () {
-    for url
+function markdown.url-to-link () {
+    local url
+    while IFS= read -r url || [[ -n "$url" ]]
     do
-        printf '[%s](%s)\n' "$(basename "$url")" "$url"
+        printf '[%s](%s)\n' "$(basename "$url" | cut -d'?' -f1)" "$url"
     done
 }
 
-function markdown.url-to-link () {
-    if [ "$1" = "-" ]; then
-        local line
-        while IFS= read -r line || [[ -n "$line" ]]
-        do
-            markdown.url-to-link.args "$line"
-        done
-    else
-        markdown.url-to-link.args "$@"
-    fi
 }
 
 ##############################
