@@ -74,3 +74,19 @@ function launchctl-reload()
 alias xcopy='pbcopy'
 alias xpaste='pbpaste'
 alias lockscreen='pmset displaysleepnow'
+
+#########################################
+##                                      #
+## Bash completions                     #
+##                                      #
+#########################################
+
+if type brew &>/dev/null; then
+  if [[ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+    source "${BREW_PREFIX}/etc/profile.d/bash_completion.sh"
+  else
+    for COMPLETION in "${BREW_PREFIX}/etc/bash_completion.d/"*; do
+      [[ -r "$COMPLETION" ]] && source "$COMPLETION"
+    done
+  fi
+fi
