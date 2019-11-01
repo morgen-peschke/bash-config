@@ -24,15 +24,15 @@ function deleteWithConfirmation() {
     done
 }
 
-for i in {'*~','a.out','*.o','*.gch','*nppdf32Log*'}
-do
-    echo "Files matching: $i"
+function find-files-to-delete () {
+    local target="$1"
+    echo "Files matching: $target"
     FILES=()
     while read -rd '' file
     do
         FILES+=("$file")
         echo "  $file"
-    done < <(find "${TARGET_DIR[@]}" -depth -iname "$i" -print0)
+    done < <(find "${TARGET_DIR[@]}" -depth -iname "$target" -print0)
 
     if [ "x${FILES[*]}" != "x" ]; then
         if confirmDeletion; then
@@ -41,4 +41,6 @@ do
             echo "   Skipping"
         fi
     fi
-done
+}
+
+find-files-to-delete '*~'
