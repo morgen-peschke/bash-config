@@ -19,7 +19,7 @@ umask 0027
 # Check for an interactive session
 [ -z "$PS1" ] && return
 
-PATH="${HOME}/.bash-config/bin:${HOME}/.bash-config/current-platform-bin:${HOME}/bin:${PATH}:${HOME}/.cask/bin"
+PATH="${HOME}/.bash-config/bin:${HOME}/.bash-config/current-platform-bin:${HOME}/bin:${PATH}:${HOME}/.cask/bin:${HOME}/go/bin"
 export PATH
 
 export SBT_OPTS="-XX:MaxMetaspaceSize=1024m -Xms2G -Xmx2G -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Duser.timezone=GMT"
