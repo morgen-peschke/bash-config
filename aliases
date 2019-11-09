@@ -526,7 +526,7 @@ function markdown.url-to-link () {
 ##############################
 ##############################
 ##
-## Misc Conversions
+## UUID
 ##
 ##############################
 ##############################
@@ -539,6 +539,8 @@ function uuid.str-to-hex-literal () {
         tr -d '-' <<< "$line"
     done
 }
+
+function uuid.random-lower-case () { uuidgen | tr A-Z a-z ; }
 
 ##############################
 ##############################
