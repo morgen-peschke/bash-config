@@ -514,20 +514,114 @@ function sbt.scoverage.open-reports () {
 ##############################
 ##############################
 
-function atlassian.url-to-crucible-link () {
-    local url
+function __atlassian.jira.comment-link.extract-ticket-and-comment-number () {
+    local url="$1" ticket_and_comment ticket comment
+    ticket_and_comment=$(basename "$url")
+    ticket=$(\cut -d'?' -f1 <<< "$ticket_and_comment")
+    comment=$(\sed -E -e 's/.*focusedCommentId=([[:digit:]]+).*/\1/' <<< "$ticket_and_comment")
+    echo "Comment $comment in $ticket"
+}
+
+function __atlassian.url.format () {
+    local url="$1"
+    shift
+    echo "[$@|$url]"
+}
+
+function atlassian.url.format.last () {
+    local url last
     while IFS= read -r url || [[ -n "$url" ]]
     do
-        printf '[%s|%s]\n' "$(basename "$url" | cut -d'?' -f1)" "$url"
+        last=$(basename "$url" | cut -d'?' -f1)
+        __atlassian.url.format "$url" "$@$last"
     done
 }
 
-function atlassian.url-to-crucible-link.jira-comment () {
+function atlassian.url.format.jira-comment () {
     local url
     while IFS= read -r url || [[ -n "$url" ]]
     do
-        printf '[Comment %s|%s]\n' "$(basename "$url" | cut -d'#' -f2 | cut -d- -f2)" "$url"
+        __atlassian.url.format \
+            "$url" \
+            "$(__atlassian.jira.comment-link.extract-ticket-and-comment-number "$url")"
     done
+}
+
+function __atlassian.block.open () {
+    local block="$1"
+    shift
+    local language="$1"
+    shift
+    if [ -z "$language" ]; then
+        if [ $# -eq 0 ]; then
+            echo "{$block}"
+        else
+            echo "{$block:title=$@}"
+        fi
+    else
+        if [ $# -eq 0 ]; then
+            echo "{$block:$language}"
+        else
+            echo "{$block:$language|title=$@}"
+        fi
+    fi
+}
+
+function __atlassian.block.close () {
+    echo -e "\n{$1}"
+}
+
+function __atlassian.code.open  () { __atlassian.block.open code "$@" ; }
+function __atlassian.code.close () { __atlassian.block.close code "$@"; }
+
+function atlassian.code.sql () {
+    __atlassian.code.open sql "$@"
+    cat -
+    __atlassian.code.close
+}
+
+function atlassian.code.sql.pretty () {
+    __atlassian.code.open sql "$@"
+    docker run \
+           --rm -i \
+           unibeautify/sqlformat:latest \
+           -k upper \
+           -i lower \
+           -s \
+           --comma_first True \
+           -r \
+           -
+    __atlassian.code.close
+}
+
+function atlassian.code.json () {
+    __atlassian.code.open json "$@"
+    cat -
+    __atlassian.code.close
+}
+
+function atlassian.code.json.pretty () {
+    __atlassian.code.open json "$@"
+    jq '.'
+    __atlassian.code.close
+}
+
+function atlassian.code.json.compact () {
+    __atlassian.code.open json "$@"
+    jq -c '.'
+    __atlassian.code.close
+}
+
+function atlassian.code.other () {
+    __atlassian.code.open "$@"
+    cat -
+    __atlassian.code.close
+}
+
+function atlassian.noformat () {
+    __atlassian.block.open noformat '' "$@"
+    cat -
+    __atlassian.block.close noformat
 }
 
 ##############################
@@ -538,11 +632,28 @@ function atlassian.url-to-crucible-link.jira-comment () {
 ##############################
 ##############################
 
-function markdown.url-to-link () {
+function __markdown.url.format () {
+    local url="$1"
+    shift
+    echo "[$@]($url)"
+}
+
+function markdown.url.format.last () {
+    local url last
+    while IFS= read -r url || [[ -n "$url" ]]
+    do
+        last=$(basename "$url" | cut -d'?' -f1)
+        __markdown.url.format "$url" "$@$last"
+    done
+}
+
+function markdown.url.format.jira-comment () {
     local url
     while IFS= read -r url || [[ -n "$url" ]]
     do
-        printf '[%s](%s)\n' "$(basename "$url" | cut -d'?' -f1)" "$url"
+        __markdown.url.format \
+            "$url" \
+            "$(__atlassian.jira.comment-link.extract-ticket-and-comment-number "$url")"
     done
 }
 
