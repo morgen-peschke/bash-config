@@ -273,14 +273,14 @@ alias gco='git checkout'
 alias gamend='git commit --amend'
 alias grb='git rebase -p'
 alias girb='git rebase -i'
-alias grb-abrt='git rebase --abort'
-alias grb-cont='git rebase --continue'
-alias grb-skip='git rebase --skip'
+alias grb.abrt='git rebase --abort'
+alias grb.cont='git rebase --continue'
+alias grb.skip='git rebase --skip'
 
 alias gbr='git branch'
-alias gbr-stat='git branch -vv'
-alias gbr-create='git checkout -b --track'
-alias gbr-set-remote='git branch --set-upstream-to=origin/"$(git.branch)"'
+alias gbr.stat='git branch -vv'
+alias gbr.create='git checkout -b --track'
+alias gbr.set-remote='git branch --set-upstream-to=origin/"$(git.branch)"'
 
 alias gmerge='git merge --no-ff'
 
@@ -290,7 +290,6 @@ alias gpullr='git pull --rebase'
 alias gpush='git push origin "HEAD:$(git.branch)"'
 
 alias gadd='git add'
-alias grm='git rm'
 
 alias glog='git log'
 alias gstat='git status'
@@ -310,12 +309,16 @@ function git.retag() {
     fi
 }
 
+function git.upstream-url () {
+    git config --get remote.origin.url | \
+        sed \
+            -e 's_git@_https://_' \
+            -e 's_\.com:_.com/_' \
+            -e 's_\.git$__'
+}
+
 function git.github() {
-    local url=$(git config --get remote.origin.url | \
-                    sed \
-                        -e 's_git@_https://_' \
-                        -e 's_\.com:_.com/_' \
-                        -e 's_\.git$__')
+    local url=$(git.upstream-url)
 
     if [ "x$url" != "x" ]; then
         go "${url}/tree/$(git.branch)"
@@ -324,13 +327,21 @@ function git.github() {
     fi
 }
 
-function git.serve () {
+function git.github.new-pull-request () {
+    echo "$(git.upstream-url)/pull/new/$(git.branch)"
+}
+
+function git.serve() {
     git daemon --reuseaddr --base-path=. --export-all --verbose --informative-errors
 }
 
 # Note: cannot write to current server branch
-function git.serve.writable () {
+function git.serve.writable() {
     git daemon --reuseaddr --base-path=. --export-all --verbose --informative-errors --enable=receive-pack
+}
+
+function git.sync () {
+    git fetch -p "$@"
 }
 
 ##############################
