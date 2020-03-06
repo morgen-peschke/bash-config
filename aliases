@@ -507,6 +507,19 @@ function docker.running () {
     docker ps --format '{{.ID}} {{.Names}}'
 }
 
+function docker.cleanup.containers () {
+    docker ps -aqf status=exited | xargs -r docker rm -v
+}
+
+function docker.cleanup.images () {
+    docker images -qf dangling=true | xargs -r docker rmi
+}
+
+function docker.cleanup.all () {
+    docker.cleanup.containers &&
+        docker.cleanup.images
+}
+
 ##############################
 ##############################
 ##
