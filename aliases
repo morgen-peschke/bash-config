@@ -737,7 +737,7 @@ function uuid.str-to-hex-literal () {
     done
 }
 
-function uuid.random-lower-case () { uuidgen | tr A-Z a-z ; }
+function uuid.random-lower-case () { uuidgen | tr A-Z a-z | tr -d '\n'; }
 
 ##############################
 ##############################
