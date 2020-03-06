@@ -131,7 +131,7 @@ function human-number()
 }
 
 # Based off a sample found on commandlinefu.com
-function find-duplicates ()
+function find.duplicates ()
 {
     find "$@" -not -empty -type f -printf "%s\0"                  | \
         sort -rnz                                                 | \
@@ -140,6 +140,14 @@ function find-duplicates ()
         xargs -0 -n1 -P0 md5sum                                   | \
         sort                                                      | \
         uniq -w32 --all-repeated=separate
+}
+
+function find.trailing-commas () {
+    if [ -z "$1" ]; then
+        echo >&2 'Trailing comma search only works on files, not piped input'.
+        return 2
+    fi
+    ag ',\s*\)' "$@"
 }
 
 # Prints the top 20 disk space hogs in the current directory
