@@ -572,6 +572,36 @@ function sbt.scoverage.open-reports () {
 ##############################
 ##############################
 ##
+## Upsource
+##
+##############################
+##############################
+
+function __upsource.comment-link.extract-filename-and-comment-id () {
+    local url="$1" raw_url query_string review filepath filename comment
+    query_string=$(\cut -d'?' -f2- <<< "$url")
+    filepath=$(\sed -E -e 's/.*filePath=([^&]+)/\1/' <<< "$query_string")
+    filename=$(\basename "$filepath")
+    comment=$(\sed -E -e 's/.*commentId=([^&]+).*/\1/' <<< "$query_string")
+
+    echo "comment $comment on $filename"
+}
+
+function __upsource.comment-link.extract-review-filename-and-comment-id () {
+    local url="$1" raw_url query_string review filepath filename comment
+    raw_url=$(\cut -d'?' -f1 <<< "$url")
+    query_string=$(\cut -d'?' -f2- <<< "$url")
+    review=$(\basename "$raw_url")
+    filepath=$(\sed -E -e 's/.*filePath=([^&]+)/\1/' <<< "$query_string")
+    filename=$(\basename "$filepath")
+    comment=$(\sed -E -e 's/.*commentId=([^&]+).*/\1/' <<< "$query_string")
+
+    echo "comment $comment on $filename in $review"
+}
+
+##############################
+##############################
+##
 ## Atlassian Products
 ##
 ##############################
@@ -582,7 +612,7 @@ function __atlassian.jira.comment-link.extract-ticket-and-comment-number () {
     ticket_and_comment=$(basename "$url")
     ticket=$(\cut -d'?' -f1 <<< "$ticket_and_comment")
     comment=$(\sed -E -e 's/.*focusedCommentId=([[:digit:]]+).*/\1/' <<< "$ticket_and_comment")
-    echo "Comment $comment in $ticket"
+    echo "comment $comment in $ticket"
 }
 
 function __atlassian.url.format () {
@@ -607,6 +637,16 @@ function atlassian.url.format.jira-comment () {
         __atlassian.url.format \
             "$url" \
             "$(__atlassian.jira.comment-link.extract-ticket-and-comment-number "$url")"
+    done
+}
+
+function atlassian.url.format.upsource-comment () {
+    local url
+    while IFS= read -r url || [[ -n "$url" ]]
+    do
+        __atlassian.url.format \
+            "$url" \
+            "$(__upsource.comment-link.extract-review-filename-and-comment-id "$url")"
     done
 }
 
@@ -643,35 +683,9 @@ function atlassian.code.sql () {
     __atlassian.code.close
 }
 
-function atlassian.code.sql.pretty () {
-    __atlassian.code.open sql "$@"
-    docker run \
-           --rm -i \
-           unibeautify/sqlformat:latest \
-           -k upper \
-           -i lower \
-           -s \
-           --comma_first True \
-           -r \
-           -
-    __atlassian.code.close
-}
-
 function atlassian.code.json () {
     __atlassian.code.open json "$@"
     cat -
-    __atlassian.code.close
-}
-
-function atlassian.code.json.pretty () {
-    __atlassian.code.open json "$@"
-    jq '.'
-    __atlassian.code.close
-}
-
-function atlassian.code.json.compact () {
-    __atlassian.code.open json "$@"
-    jq -c '.'
     __atlassian.code.close
 }
 
@@ -717,6 +731,26 @@ function markdown.url.format.jira-comment () {
         __markdown.url.format \
             "$url" \
             "$(__atlassian.jira.comment-link.extract-ticket-and-comment-number "$url")"
+    done
+}
+
+function markdown.url.format.upsource-comment () {
+    local url
+    while IFS= read -r url || [[ -n "$url" ]]
+    do
+        __markdown.url.format \
+            "$url" \
+            "$(__upsource.comment-link.extract-filename-and-comment-id "$url")"
+    done
+}
+
+function markdown.url.format.upsource-comment.include-review-name () {
+    local url
+    while IFS= read -r url || [[ -n "$url" ]]
+    do
+        __markdown.url.format \
+            "$url" \
+            "$(__upsource.comment-link.extract-review-filename-and-comment-id "$url")"
     done
 }
 
