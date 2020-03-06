@@ -206,9 +206,27 @@ function yaml2json.pretty () {
 ##############################
 ##############################
 
-alias cleanxml='xmllint --format -'
-alias cleanhtml='xmllint --html --format -'
-alias cleanjson='python -mjson.tool'
+function code.format.xml  () {
+    xmllint --format -
+}
+function code.format.html () {
+    xmllint --html --format -
+}
+function code.format.json.pretty () {
+    jq '.'
+}
+function code.format.json.compact () {
+    jq -c '.'
+}
+function code.format.sql () {
+    docker run --rm -i \
+           unibeautify/sqlformat:latest \
+           -k upper \
+           -i lower \
+           -s -r \
+           --comma_first False \
+           - ;
+}
 
 ##############################
 ##############################
