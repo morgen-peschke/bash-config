@@ -365,8 +365,16 @@ function git.github() {
     fi
 }
 
-function git.github.new-pull-request () {
-    echo "$(git.upstream-url)/pull/new/$(git.branch)"
+function git.github.pull-request.url () {
+    if [ "$1" ]; then
+        echo "$(git.upstream-url)/compare/$1...$(git.branch)?expand=1"
+    else
+        echo "$(git.upstream-url)/pull/new/$(git.branch)"
+    fi
+}
+
+function git.github.pull-request.create () {
+    open "$(git.github.pull-request.url "$@")"
 }
 
 function git.serve() {
@@ -380,6 +388,10 @@ function git.serve.writable() {
 
 function git.sync () {
     git fetch -p "$@"
+}
+
+function git.sync.pull () {
+    git.sync && git pull
 }
 
 ##############################
