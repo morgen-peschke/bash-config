@@ -185,6 +185,18 @@ function open-descriptors-by-command ()
         tail
 }
 
+function yaml2json () {
+    yaml2json.compact
+}
+
+function yaml2json.compact () {
+    ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))'
+}
+
+function yaml2json.pretty () {
+    ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))'
+}
+
 ##############################
 ##############################
 ##
