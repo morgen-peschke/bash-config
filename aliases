@@ -356,7 +356,7 @@ function git.retag() {
 }
 
 function git.upstream-url () {
-    git config --get remote.origin.url | \
+    git remote get-url --push origin | \
         sed \
             -e 's_git@_https://_' \
             -e 's_\.com:_.com/_' \
@@ -383,6 +383,10 @@ function git.github.pull-request.url () {
 
 function git.github.pull-request.create () {
     open "$(git.github.pull-request.url "$@")"
+}
+
+function git.github.commit.url () {
+    echo "$(git.upstream-url)/$(git rev-parse HEAD)"
 }
 
 function git.serve() {
