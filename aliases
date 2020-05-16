@@ -731,6 +731,12 @@ function atlassian.noformat () {
     __atlassian.block.close noformat
 }
 
+function atlassian.panel () {
+    __atlassian.block.open panel '' "$@"
+    cat -
+    __atlassian.block.close panel
+}
+
 ##############################
 ##############################
 ##
