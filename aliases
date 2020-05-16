@@ -150,6 +150,10 @@ function find.trailing-commas () {
     ag ',\s*\)' "$@"
 }
 
+function find.non-ascii () {
+    ag '[^\x00-\x7F]' "$@"
+}
+
 # Prints the top 20 disk space hogs in the current directory
 function dirsize ()
 {
