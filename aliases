@@ -216,6 +216,9 @@ function code.format.xml  () {
 function code.format.html () {
     xmllint --html --format -
 }
+function code.format.html.entity () {
+    printf '&#%d;' "'$1"
+}
 function code.format.json.pretty () {
     jq '.'
 }
@@ -261,8 +264,9 @@ complete -cf s
 ##############################
 
 # Helper function to web encode a string
-function webSafe()
-{ echo "$@" | xxd -plain | tr -d '\n' | sed 's/\(..\)/%\1/g'; }
+function webSafe() {
+    echo "$@" | xxd -plain | tr -d '\n' | sed 's/\(..\)/%\1/g';
+}
 
 # Get the contents of the clipboard if there are no passed arguments
 function argClip()
