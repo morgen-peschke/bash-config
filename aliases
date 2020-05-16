@@ -756,7 +756,7 @@ function markdown.url.format.last () {
     while IFS= read -r url || [[ -n "$url" ]]
     do
         last=$(basename "$url" | cut -d'?' -f1)
-        __markdown.url.format "$url" "$@$last"
+        __markdown.url.format "$url" "$last"
     done
 }
 
