@@ -543,7 +543,8 @@ function docker.cleanup.all () {
 function helm.install-service {
     local service="$1"
     shift
-    helm install "service-$service" . --wait -f values-dev.yaml --set "$service".enabled=true "$@"
+
+    (set -x; helm install "service-$service" . --wait -f values-dev.yaml --set "$service".enabled=true "$@")
 }
 
 function helm.uninstall-all {
