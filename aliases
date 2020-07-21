@@ -386,7 +386,7 @@ function git.github.pull-request.create () {
 }
 
 function git.github.commit.url () {
-    echo "$(git.upstream-url)/commits/$(git rev-parse HEAD)"
+    echo "$(git.upstream-url)/commit/$(git rev-parse HEAD)"
 }
 
 function git.serve() {
