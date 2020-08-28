@@ -544,7 +544,16 @@ function helm.install-service {
     local service="$1"
     shift
 
-    (set -x; helm install "service-$service" . --wait -f values-dev.yaml --set "$service".enabled=true "$@")
+    local service_name
+    local cdup=$(git rev-parse --show-cdup 2>&1)
+    if [ $? = 0 ]; then
+        local gitroot=$(basename "$(cd "$cdup" && pwd)")
+        service_name="helm-$service-$gitroot"
+    else
+        service_name="helm-$service"
+    fi
+
+    (set -x; helm install "$service_name" . --wait -f values-dev.yaml --set "$service".enabled=true "$@")
 }
 
 function helm.uninstall-all {
