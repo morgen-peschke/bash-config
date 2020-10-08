@@ -39,6 +39,13 @@ alias rgrep='grep -R'
 alias grep='grep -n --color=auto'
 export GREP_COLORS='mt=0;34'
 
+# Put the last two elements of the path as the tab title
+# Based on https://gist.github.com/phette23/5270658#gistcomment-1996641
+function cd() {
+    builtin cd "$@";
+    term.update-tab-title "$(git.describe --short) | $(util.last-two-elements-of-pwd)";
+}
+
 ##############################
 ##############################
 ##
@@ -46,12 +53,27 @@ export GREP_COLORS='mt=0;34'
 ##
 ##############################
 ##############################
-function abspath ()
+function util.abspath ()
 {
     echo "$(cd $(dirname "$@"); pwd -P)/$(basename "$@")"
 }
 
-function tarball ()
+function term.update-tab-title() {
+    echo -ne "\033]0;"$*"\007"
+}
+
+function util.last-two-elements-of-pwd () {
+    awk -F '/' \
+        '{ if (NF >= 4) {
+             printf ("../%s/%s\n",$(NF-1),$NF)
+           }
+           else {
+             print $0
+           }
+         }' <<< "$PWD"
+}
+
+function util.tarball ()
 {
     local FILE
     for FILE in "${@}"
@@ -71,7 +93,7 @@ function tarball ()
 }
 
 # Based on sample from alias.sh
-function extract ()
+function util.extract ()
 {
     local FILE
     for FILE in "${@}"
@@ -98,7 +120,7 @@ function extract ()
     done
 }
 
-function mid()
+function util.mid()
 {
     local start="$1"
     local end="$2"
@@ -109,11 +131,11 @@ function mid()
     tail -n+"$start" "$file" | head -n"$end"
 }
 
-function line-nums() { nl -ba "$@"; }
+function util.line-nums() { nl -ba "$@"; }
 
 # Based on a directory size alias on alias.sh
 # Converts bytes into higher-order representations
-function human-number()
+function util.human-number()
 {
     local size;
     local unit;
@@ -131,7 +153,7 @@ function human-number()
 }
 
 # Based off a sample found on commandlinefu.com
-function find.duplicates ()
+function util.find.duplicates ()
 {
     find "$@" -not -empty -type f -printf "%s\0"                  | \
         sort -rnz                                                 | \
@@ -142,7 +164,7 @@ function find.duplicates ()
         uniq -w32 --all-repeated=separate
 }
 
-function find.trailing-commas () {
+function util.find.trailing-commas () {
     if [ -z "$1" ]; then
         echo >&2 'Trailing comma search only works on files, not piped input'.
         return 2
@@ -150,12 +172,12 @@ function find.trailing-commas () {
     ag ',\s*\)' "$@"
 }
 
-function find.non-ascii () {
+function util.find.non-ascii () {
     ag '[^\x00-\x7F]' "$@"
 }
 
 # Prints the top 20 disk space hogs in the current directory
-function dirsize ()
+function util.dirsize ()
 {
     local root="$1/";
     [ ! "$1" ] && root='.'
@@ -177,7 +199,7 @@ function dirsize ()
 }
 
 # List 10 commands with the most open file descriptors
-function open-descriptors-by-command ()
+function util.open-descriptors-by-command ()
 {
     lsof -n |
         tail -n+2 |
@@ -189,26 +211,35 @@ function open-descriptors-by-command ()
         tail
 }
 
-function yaml2json () {
+function util.yaml2json () {
     yaml2json.compact
 }
 
-function yaml2json.compact () {
+function util.yaml2json.compact () {
     ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))'
 }
 
-function yaml2json.pretty () {
+function util.yaml2json.pretty () {
     ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))'
+}
+
+function util.emoji () {
+    emoji.search.bash "$@"
+}
+
+function util.emoji.copy () {
+    emoji.search.bash "$@" | xcopy
 }
 
 ##############################
 ##############################
 ##
 ## Functions for cleaning up
-## input
+## input - the read from stdin and write to stdout
 ##
 ##############################
 ##############################
+
 
 function code.format.xml  () {
     xmllint --format -
@@ -216,15 +247,23 @@ function code.format.xml  () {
 function code.format.html () {
     xmllint --html --format -
 }
+
+# Work around for reserved HTML characters
+#
+# Because this is a bit of a hack, we get
+# &#60; for < instead of &lt;
 function code.format.html.entity () {
     printf '&#%d;' "'$1"
 }
+
 function code.format.json.pretty () {
     jq '.'
 }
 function code.format.json.compact () {
     jq -c '.'
 }
+
+# Not prefect, notably lacking around DDL statements
 function code.format.sql () {
     docker run --rm -i \
            unibeautify/sqlformat:latest \
@@ -303,7 +342,6 @@ function lds()               { go "http://www.lds.org/search?lang=eng&query=$(qu
 function scriptures()        { go "http://www.lds.org/search?lang=eng&query=$(query $@)&collection=scriptures" ; }
 function cpp()               { googleSearch "site:cplusplus.com/ $(argClip "$@")" ; }
 
-# Got from alias.sh
 function html-header() { curl --head "$(argClip "$@")"; }
 
 ##############################
@@ -316,7 +354,6 @@ function html-header() { curl --head "$(argClip "$@")"; }
 
 alias gci='git commit'
 alias gco='git checkout'
-alias gamend='git commit --amend'
 alias grb='git rebase -p'
 alias girb='git rebase -i'
 alias grb.abrt='git rebase --abort'
@@ -341,6 +378,42 @@ alias glog='git log'
 alias gstat='git status'
 alias gdiff='git diff --ignore-space-at-eol'
 alias gshow='git show --ignore-space-at-eol'
+
+function git.describe () {
+    local git_dir repo branch
+
+    git_dir=$(git.root 2>/dev/null)
+    if [ $? -ne 0 ]; then
+        echo 'git:-'
+        return
+    fi
+
+    repo=$(basename "$git_dir")
+    if [ "$1" = '--short' ]; then
+        echo "git:$repo"
+    else
+        branch=$(git.branch)
+        printf "git:%s @ %s\n" "$repo" "$branch"
+    fi
+}
+
+function git.root () {
+    local git_dir
+    git_dir=$(git rev-parse --git-dir 2>/dev/null)
+    if [ $? -eq 0 ]; then
+        dirname "$git_dir"
+    else
+        return $?
+    fi
+}
+
+function git.ammend() {
+    git commit --amend "$@"
+}
+
+function git.ammend.preserve-message() {
+    git commit --amend --no-edit "$@"
+}
 
 function git.branch() {
     git symbolic-ref HEAD 2>/dev/null | sed -e 's/refs\/heads\///'
@@ -409,103 +482,14 @@ function git.sync.pull () {
 ##############################
 ##############################
 ##
-## Rails Helpers
+## Language-specific helpers
 ##
 ##############################
 ##############################
 
-alias rake='rake -t'
-
-function rails-resque-pool () {
-    resque-pool "$(git root)/config/resque-pool.yml"
+function helpers.ruby.load () {
+    source "$HOME"/.bash-config/language-specific-stuff/ruby
 }
-
-alias rails-test-units="rake test:units"
-alias rails-test-functionals="rake test:functionals"
-alias rails-test-integration="rake test:integration"
-
-function rails-test-single () {
-    if [ -z "$1" ]; then
-        echo 'rails-test-one <test_file.rb> <function_name>'
-    else
-        local file=
-        local test=
-        if [ -f "$1" ]; then
-            file="$1"
-            if [ -n "$2" ]; then
-                test="$2"
-            fi
-        else
-            test="$1"
-            file="$(ag -l --nocolor --column "def ${test}")"
-            local matches="$(wc -l <<< "$file")"
-
-            if [ "x$matches" != "x1" ]; then
-                echo "Test ${test} found in multiple files"
-                return 1
-            fi
-
-            if [ ! -f "$file" ]; then
-                echo "Test ${test} not found"
-                return 1
-            fi
-        fi
-
-        if [ -n "$test" ]; then
-            ruby -I "$(git root)/test/" "$file" -n "$test"
-        else
-            ruby -I "$(git root)/test/" "$file"
-        fi
-    fi
-}
-
-function rails-db-migration-last () (
-    cdr-migrate && ls | tail -n1
-)
-
-function rails-db-migration-last-timestamp () {
-    rails-last-migration | cut -d_ -f1
-}
-
-function rails-db-migrate-to-file () {
-    rake -t db:migrate VERSION="$(argClip "$@" | cut -d_ -f1)"
-}
-
-function rails-db-migration-redo () {
-    rake -t db:migrate:redo VERSION="$1"
-}
-
-function cd-in-rails() {
-    local root="$(git root)"
-    if [ -n "$root" ]; then
-        cd "$(cd "$root/$@" && pwd)"
-    else
-        return 1
-    fi
-}
-alias cdr="cd-in-rails"
-
-function cdr-config          () { cdr "config";                    }
-function cdr-script          () { cdr "script";                    }
-function cdr-lib             () { cdr "lib";                       }
-
-function cdr-app             () { cdr "app/$@";                    }
-function cdr-controllers     () { cdr "app/controllers/$@";        }
-function cdr-models          () { cdr "app/models/$@";             }
-function cdr-helpers         () { cdr "app/helpers/$@";            }
-function cdr-views           () { cdr "app/views/$@";              }
-function cdr-workers         () { cdr "app/workers/$@";            }
-function cdr-assets          () { cdr "app/assets/$@";             }
-function cdr-javascripts     () { cdr "app/assets/javascripts/$@"; }
-function cdr-stylesheets     () { cdr "app/assets/stylesheets/$@"; }
-
-function cdr-db              () { cdr "db/$@";                     }
-function cdr-migrate         () { cdr "db/migrate/$@";             }
-
-function cdr-test            () { cdr "test/$@";                   }
-function cdr-unit            () { cdr "test/unit/$@";              }
-function cdr-functional      () { cdr "test/functional/$@";        }
-function cdr-integration     () { cdr "test/integration/$@";       }
 
 ##############################
 ##############################
@@ -540,15 +524,60 @@ function docker.cleanup.all () {
 ##############################
 ##############################
 
-function helm.install-service {
-    local service="$1"
-    shift
+function _helm_autocomplete_install () {
+    if (( ${#COMP_WORDS[@]} == 2 )); then
+        local dependencies=$(helm dependency list |
+                                 awk 'NF {if ($1 != "NAME") { print $1 }}')
 
-    (set -x; helm install "service-$service" . --wait -f values-dev.yaml --set "$service".enabled=true "$@")
+        COMPREPLY=($(compgen -W "$dependencies" -- "${COMP_WORDS[1]}"))
+    fi
 }
 
-function helm.uninstall-all {
+function helm.install {
+    local chart="$1"
+    local release="helm-$chart"
+    shift
+
+    (set -x; helm install "$release" . --wait -f values-dev.yaml --set "$chart".enabled=true "$@")
+}
+
+complete -F _helm_autocomplete_install helm.install
+
+function helm.upgrade {
+    local chart="$1" release
+    shift
+
+    if [ "$1" ]; then
+        release="$1"
+    else
+        release="helm-$chart"
+    fi
+
+    (set -x; helm upgrade --install "$release" . --wait -f values-dev.yaml --set "$chart".enabled=true "$@")
+}
+
+function _helm_autocomplete_upgrade () {
+    if (( ${#COMP_WORDS[@]} == 2 )); then
+        local dependencies=$(helm dependency list |
+                                 awk 'NF {if ($1 != "NAME") { print $1 }}')
+
+        COMPREPLY=($(compgen -W "$dependencies" -- "${COMP_WORDS[1]}"))
+    elif (( ${#COMP_WORDS[@]} == 3 )); then
+        local releases=$(helm list |
+                             awk 'NF {if ($1 != "NAME") { print $1 }}')
+
+        COMPREPLY=($(compgen -W "$releases" -- "${COMP_WORDS[2]}"))
+    fi
+}
+
+complete -F _helm_autocomplete_upgrade helm.upgrade
+
+function helm.uninstall.all {
     helm ls --short | xargs helm uninstall
+}
+
+function helm.status {
+    kubectl get pods
 }
 
 ##############################
@@ -633,11 +662,13 @@ function __upsource.comment-link.extract-review-filename-and-comment-id () {
 ##############################
 ##############################
 ##
-## Atlassian Products
+## Atlassian Products : these read from stdin and write to stdout
 ##
 ##############################
 ##############################
 
+# Implementation detail: builds a pretty representation of ticket and comment
+# from a JIRA comment permalink
 function __atlassian.jira.comment-link.extract-ticket-and-comment-number () {
     local url="$1" ticket_and_comment ticket comment
     ticket_and_comment=$(basename "$url")
@@ -646,12 +677,16 @@ function __atlassian.jira.comment-link.extract-ticket-and-comment-number () {
     echo "comment $comment in $ticket"
 }
 
+# Implementation detail: common code for atlassian's url markup
 function __atlassian.url.format () {
     local url="$1"
     shift
     echo "[$@|$url]"
 }
 
+# Uses the last part of a URL as it's display text.
+#
+# EX: http://example.com/foo becomes [foo|http://example.com/foo]
 function atlassian.url.format.last () {
     local url last
     while IFS= read -r url || [[ -n "$url" ]]
@@ -661,6 +696,8 @@ function atlassian.url.format.last () {
     done
 }
 
+# Attempts to pretty-print the comment number and ticket number
+# for a JIRA link
 function atlassian.url.format.jira-comment () {
     local url
     while IFS= read -r url || [[ -n "$url" ]]
@@ -681,6 +718,7 @@ function atlassian.url.format.upsource-comment () {
     done
 }
 
+# Implementation detail: common code for opening an Atlassian block's markup
 function __atlassian.block.open () {
     local block="$1"
     shift
@@ -701,41 +739,96 @@ function __atlassian.block.open () {
     fi
 }
 
+# Implementation detail: common code for closing an Atlassian block's markup
 function __atlassian.block.close () {
     echo -e "\n{$1}"
 }
 
+# Implementation detail: this got tedious to write
 function __atlassian.code.open  () { __atlassian.block.open code "$@" ; }
 function __atlassian.code.close () { __atlassian.block.close code "$@"; }
 
+# Wrap a block of SQL in a code block
+#
+# Does not format the SQL
+#
+# Any arguments are assumed to be the intended title of the block
 function atlassian.code.sql () {
     __atlassian.code.open sql "$@"
     cat -
     __atlassian.code.close
 }
 
+# Wrap a block of JSON in a code block
+#
+# Does not format the JSON
+#
+# Any arguments are assumed to be the intended title of the block
 function atlassian.code.json () {
     __atlassian.code.open json "$@"
     cat -
     __atlassian.code.close
 }
 
+# Wrap a block of JSON in a code block
+#
+# Pretty-prints the JSON (preferable if you have the space)
+#
+# Any arguments are assumed to be the intended title of the block
+function atlassian.code.json.pretty () {
+    __atlassian.code.open json "$@"
+    code.format.json.pretty
+    __atlassian.code.close
+}
+
+# Wrap a block of JSON in a code block
+#
+# Compacts the JSON (preferable if you are running out of characters in a comment)
+#
+# Any arguments are assumed to be the intended title of the block
+function atlassian.code.json.compact () {
+    __atlassian.code.open json "$@"
+    code.format.json.compact
+    __atlassian.code.close
+}
+
+# Wrap any other code type, expects thet language as the first argument
+#
+# Use `''` as the first argument if no language should be specified
+#
+# Any arguments after the first are assumed to be the intended title of the block
 function atlassian.code.other () {
     __atlassian.code.open "$@"
     cat -
     __atlassian.code.close
 }
 
+# Wrap up arbitrary fixed-width text, useful for log messages
+#
+# Don't use atlassian.code.other for log messages, as it breaks JIRA's formatter
+#
+# Any arguments are assumed to be the intended title of the block
 function atlassian.noformat () {
     __atlassian.block.open noformat '' "$@"
     cat -
     __atlassian.block.close noformat
 }
 
+# Wrap up markup in a panel
+#
+# Any arguments are assumed to be the intended title of the block
 function atlassian.panel () {
     __atlassian.block.open panel '' "$@"
     cat -
     __atlassian.block.close panel
+}
+
+function atlassian.headers.evidence-of-dev-test-comment () {
+    local identifier=''
+    if [ "$1" ]; then
+        identifier=$(echo " :: $@")
+    fi
+    echo "h3. Evidence of Dev Test$identifier"
 }
 
 ##############################

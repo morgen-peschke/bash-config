@@ -35,18 +35,32 @@ export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx8G"
 ##############################
 
 # Source global
-[ -f /etc/bashrc ] && source /etc/bashrc
-[ -f /etc/bash_completion ] && source /etc/bash_completion
+[ -f /etc/bashrc ] && {
+    echo >&2 'Sourcing global bashrc from /etc/bashrc'
+    source /etc/bashrc
+}
+[ -f /etc/bash_completion ] && {
+    echo >&2 'Sourcing global bash completions from /etc/bash_completion'
+    source /etc/bash_completion
+}
 
 # Add completion functions
 if [ -d ~/.bash-config/completion-source/ ]; then
-   for i in ~/.bash-config/completion-source/*.bash; do source "$i"; done
+    echo >&2 'Sourcing local bash completions'
+
+    for i in ~/.bash-config/completion-source/*.bash
+    do source "$i"
+       echo >&2 " :: $i"
+    done
 fi
 
 # Source secondary configuration files
 for i in completions aliases current-platform local-rc
 do
-    [ -f "${HOME}/.bash-config/${i}" ] && source "${HOME}/.bash-config/${i}"
+    [ -f "${HOME}/.bash-config/$i" ] && {
+        echo >&2 "Sourcing local config from ~/.bash-config/$i"
+        source "${HOME}/.bash-config/$i"
+    }
 done
 
 bind Space:magic-space
@@ -70,5 +84,3 @@ if [[ "$(tty | cut -d'/' -f3 | head -c3)" != "tty" ]]; then
     fi
 fi
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"

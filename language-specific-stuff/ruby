@@ -1,0 +1,105 @@
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+##############################
+##############################
+##
+## Rails Helpers
+##
+##############################
+##############################
+
+alias rake='rake -t'
+
+function rails-resque-pool () {
+    resque-pool "$(git root)/config/resque-pool.yml"
+}
+
+alias rails-test-units="rake test:units"
+alias rails-test-functionals="rake test:functionals"
+alias rails-test-integration="rake test:integration"
+
+function rails-test-single () {
+    if [ -z "$1" ]; then
+        echo 'rails-test-one <test_file.rb> <function_name>'
+    else
+        local file=
+        local test=
+        if [ -f "$1" ]; then
+            file="$1"
+            if [ -n "$2" ]; then
+                test="$2"
+            fi
+        else
+            test="$1"
+            file="$(ag -l --nocolor --column "def ${test}")"
+            local matches="$(wc -l <<< "$file")"
+
+            if [ "x$matches" != "x1" ]; then
+                echo "Test ${test} found in multiple files"
+                return 1
+            fi
+
+            if [ ! -f "$file" ]; then
+                echo "Test ${test} not found"
+                return 1
+            fi
+        fi
+
+        if [ -n "$test" ]; then
+            ruby -I "$(git root)/test/" "$file" -n "$test"
+        else
+            ruby -I "$(git root)/test/" "$file"
+        fi
+    fi
+}
+
+function rails-db-migration-last () (
+    cdr-migrate && ls | tail -n1
+)
+
+function rails-db-migration-last-timestamp () {
+    rails-last-migration | cut -d_ -f1
+}
+
+function rails-db-migrate-to-file () {
+    rake -t db:migrate VERSION="$(argClip "$@" | cut -d_ -f1)"
+}
+
+function rails-db-migration-redo () {
+    rake -t db:migrate:redo VERSION="$1"
+}
+
+function cd-in-rails() {
+    local root="$(git root)"
+    if [ -n "$root" ]; then
+        cd "$(cd "$root/$@" && pwd)"
+    else
+        return 1
+    fi
+}
+alias cdr="cd-in-rails"
+
+function cdr-config          () { cdr "config";                    }
+function cdr-script          () { cdr "script";                    }
+function cdr-lib             () { cdr "lib";                       }
+
+function cdr-app             () { cdr "app/$@";                    }
+function cdr-controllers     () { cdr "app/controllers/$@";        }
+function cdr-models          () { cdr "app/models/$@";             }
+function cdr-helpers         () { cdr "app/helpers/$@";            }
+function cdr-views           () { cdr "app/views/$@";              }
+function cdr-workers         () { cdr "app/workers/$@";            }
+function cdr-assets          () { cdr "app/assets/$@";             }
+function cdr-javascripts     () { cdr "app/assets/javascripts/$@"; }
+function cdr-stylesheets     () { cdr "app/assets/stylesheets/$@"; }
+
+function cdr-db              () { cdr "db/$@";                     }
+function cdr-migrate         () { cdr "db/migrate/$@";             }
+
+function cdr-test            () { cdr "test/$@";                   }
+function cdr-unit            () { cdr "test/unit/$@";              }
+function cdr-functional      () { cdr "test/functional/$@";        }
+function cdr-integration     () { cdr "test/integration/$@";       }
