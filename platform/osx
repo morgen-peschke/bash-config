@@ -7,6 +7,8 @@
 ##############################
 ##############################
 
+export BASH_SILENCE_DEPRECATION_WARNING=1
+
 COREUTILS_PREFIX="$(brew --prefix coreutils)"
 FINDUTILS_PREFIX="$(brew --prefix findutils)"
 BREW_PREFIX="$(brew --prefix)"
