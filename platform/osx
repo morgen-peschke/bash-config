@@ -73,8 +73,8 @@ function launchctl-reload()
 ##############################
 ##############################
 
-alias xcopy='pbcopy'
-alias xpaste='pbpaste'
+function xcopy () { pbcopy "$@"; }
+function xpaste () { pbpaste "$@"; }
 alias lockscreen='pmset displaysleepnow'
 
 #########################################
