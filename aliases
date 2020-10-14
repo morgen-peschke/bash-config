@@ -231,6 +231,10 @@ function util.emoji.copy () {
     emoji.search.bash "$@" | xcopy
 }
 
+function util.encode.url () {
+    jq -sRr @uri
+}
+
 ##############################
 ##############################
 ##
