@@ -463,7 +463,7 @@ function git.github.pull-request.create () {
 }
 
 function git.github.commit.url () {
-    echo "$(git.upstream-url)/commit/$(git rev-parse HEAD)"
+    echo "$(git.upstream-url)/commits/$(git rev-parse HEAD)"
 }
 
 function git.serve() {
@@ -759,6 +759,17 @@ function __atlassian.code.close () { __atlassian.block.close code "$@"; }
 # Any arguments are assumed to be the intended title of the block
 function atlassian.code.sql () {
     __atlassian.code.open sql "$@"
+    cat -
+    __atlassian.code.close
+}
+
+# Wrap a block of Scala code in a code block
+#
+# Does not format the code
+#
+# Any arguments are assumed to be the intended title of the block
+function atlassian.code.scala () {
+    __atlassian.code.open scala "$@"
     cat -
     __atlassian.code.close
 }
