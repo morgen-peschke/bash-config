@@ -9,15 +9,20 @@
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
 
-COREUTILS_PREFIX="$(brew --prefix coreutils)"
-FINDUTILS_PREFIX="$(brew --prefix findutils)"
+eval "$(brew shellenv)"
+
 BREW_PREFIX="$(brew --prefix)"
-TEX_BIN="/Library/Tex/texbin"
 
-PATH="$HOME/bin:$COREUTILS_PREFIX/libexec/gnubin:$FINDUTILS_PREFIX/libexec/gnubin:/usr/local/bin:/usr/local/sbin:$TEX_BIN:$PATH"
+PATH="/Library/Tex/texbin:/usr/local/bin:/usr/local/sbin:$PATH"
+
+for pkg in coreutils findutils
+do
+    PATH="$(brew --prefix "$pkg")/libexec/gnubin:$PATH"
+    MANPATH="$(brew --prefix "$pkg")/libexec/gnuman:$MANPATH"
+done
+
+PATH="$HOME/bin:$PATH"
 export PATH
-
-MANPATH="$COREUTILS_PREFIX/libexec/gnuman:$FINDUTILS_PREFIX/libexec/gnuman:$MANPATH"
 export MANPATH
 
 # Set emacs versions
