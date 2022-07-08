@@ -19,7 +19,7 @@ umask 0027
 # Check for an interactive session
 [ -z "$PS1" ] && return
 
-PATH="${HOME}/.bash-config/bin:${HOME}/.bash-config/current-platform-bin:${HOME}/bin:${PATH}:${HOME}/.cask/bin:${HOME}/go/bin"
+PATH="${HOME}/.bash-config/local-bin:${HOME}/.bash-config/bin:${HOME}/.bash-config/current-platform-bin:${HOME}/bin:${PATH}:${HOME}/.cask/bin:${HOME}/go/bin"
 export PATH
 
 export SBT_OPTS="-XX:MaxMetaspaceSize=1024m -Xms512m -Xmx8G -XX:+CMSClassUnloadingEnabled -Duser.timezone=GMT"
@@ -83,4 +83,3 @@ if [[ "$(tty | cut -d'/' -f3 | head -c3)" != "tty" ]]; then
 	list
     fi
 fi
-
