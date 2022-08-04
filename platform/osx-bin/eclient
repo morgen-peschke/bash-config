@@ -1,8 +1,13 @@
 #!/bin/bash
-args="-s $EMACS_SOCKET"
+
+if [ "$EMACS_SOCKET" ]; then
+    args=(-s "$EMACS_SOCKET")
+else
+    args=()
+fi
 
 if [ "$1" ]; then
-	"$EMACSCLIENT" $args "$@"
+	"$EMACSCLIENT" "${args[@]}" "$@"
 else
-        "$EMACSCLIENT" $args -ne '(mpeschke/goto-or-create-untitled-buffer)'
+        "$EMACSCLIENT" "${args[@]}" -ne '(mpeschke/goto-or-create-untitled-buffer)'
 fi
