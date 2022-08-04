@@ -9,7 +9,11 @@
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
 
-eval "$(brew shellenv)"
+if [ -f '/opt/homebrew/bin/brew' ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+else
+    eval "$(brew shellenv)"
+fi
 
 BREW_PREFIX="$(brew --prefix)"
 
