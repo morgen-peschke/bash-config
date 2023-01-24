@@ -4,14 +4,11 @@
 [core]
 	editor = eclient
         pager = less -S
+	hooksPath = /Users/morgen/development/global-hooks/
 [alias]
 	unstage = reset HEAD --
 	root = !pwd
         fix-whitespace = rebase --whitespace=fix
-        tree = log --graph --pretty=format:'%C(red)%h%C(reset) %C(blue)%<(12)%ar%C(reset) %C(auto)%d %s'
-        lola = tree --all
-        show-changed-files = show --summary --name-only
-        log-changed-files = log --summary --name-only
 [color]
 	ui = auto
 [push]

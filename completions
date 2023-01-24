@@ -1,22 +1,51 @@
-__git_complete gci                    _git_commit
-__git_complete gco                    _git_checkout
-__git_complete grb                    _git_rebase
-__git_complete girb                   _git_rebase
-__git_complete gbr                    _git_branch
-__git_complete gbr-delete-local       _git_branch
-__git_complete gbr-delete-remote      _git_branch
-__git_complete gbr-delete-completely  _git_branch
-__git_complete gmerge                 _git_merge
-__git_complete gpull                  _git_pull
-__git_complete gpush                  _git_push
-__git_complete gadd                   _git_add
-__git_complete grm                    _git_rm
-__git_complete glog                   _git_log
-__git_complete gstash-push            _git_stash
-__git_complete gstash-pop             _git_stash
-__git_complete gstash-list            _git_stash
-__git_complete gdiff                  _git_diff
-__git_complete gshow                  _git_show
+__git_complete g.add _git_add
+__git_complete g.rm _git_rm
+
+__git_complete g.ci _git_commit
+__git_complete g.ci.skip-checks _git_commit
+__git_complete g.ci.ammend _git_commit
+__git_complete g.ci.ammend.preserve-message _git_commit
+
+__git_complete g.co _git_checkout
+__git_complete g.co.main _git_checkout
+
+__git_complete g.branch _git_branch
+__git_complete g.branch.reset-upstream _git_branch
+__git_complete g.branch.create _git_branch
+__git_complete g.branch.delete _git_branch
+
+__git_complete g.cherry-pick _git_cherry_pick
+
+__git_complete g.rebase.interactive _git_rebase
+
+__git_complete g.log _git_log
+__git_complete g.log.only-changed-files _git_log
+__git_complete g.log.lola _git_log
+__git_complete g.log.tree _git_log
+
+__git_complete g.diff _git_diff
+__git_complete g.diff.staged _git_diff
+__git_complete g.diff.include-whitespace _git_diff
+
+__git_complete g.show _git_show
+__git_complete g.show.only-changed-files _git_show
+__git_complete g.include-whitespace _git_show
+
+__git_complete g.pull _git_pull
+__git_complete g.push _git_push
+__git_complete g.push.set-upstream _git_push
+
+__git_complete g.fetch _git_fetch
+__git_complete g.sync _git_fetch
+
+__git_complete g.merge _git_merge
+
+__git_complete g.stash.list _git_stash
+__git_complete g.stash.drop _git_stash
+__git_complete g.stash.clear _git_stash
+__git_complete g.stash.push _git_stash
+__git_complete g.stash.pop _git_stash
+__git_complete g.stash.pop.to-branch _git_stash
 
 complete -F _svn -o default -X '@(*/.svn|*/.svn/|.svn|.svn/)' svn
 complete -F _svnadmin -o default svnadmin

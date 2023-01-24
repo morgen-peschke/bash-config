@@ -43,7 +43,7 @@ export GREP_COLORS='mt=0;34'
 # Based on https://gist.github.com/phette23/5270658#gistcomment-1996641
 function cd() {
     builtin cd "$@";
-    term.update-tab-title "$(git.describe --short) | $(util.last-two-elements-of-pwd)";
+    term.update-tab-title "$(g.describe --short) | $(util.last-two-elements-of-pwd)";
 }
 
 ##############################
@@ -235,6 +235,11 @@ function util.encode.url () {
     jq -sRr @uri
 }
 
+# From https://stackoverflow.com/a/70560850 and https://stackoverflow.com/a/6265305
+function util.decode.url () {
+    sed -e 's/\+/ /g' -e 's/%\(..\)/\\\\x\1/g' | xargs -I '{}' printf '%b\n' '{}'
+}
+
 ##############################
 ##############################
 ##
@@ -334,18 +339,6 @@ function force-url()
     fi
 }
 
-function googleSearch-incognito()
-{ go-incognito  "http://www.google.com/search?q=$(query $@)" ; }
-
-function googleImageSearch() { go "http://www.google.com/search?q=$(query $@)&safe=active&tbm=isch"            ; }
-function define()            { googleSearch "define:$(argClip "$@")"                ; }
-function wiki()              { googleSearch "site:en.wikipedia.org $(argClip "$@")" ; }
-function pt-to-en()          { "$BROWSER" 'https://translate.google.com/#pt/en/'"$(argClip "$1")"; }
-function en-to-pt()          { "$BROWSER" 'https://translate.google.com/#en/pt/'"$(argClip "$1")"; }
-function lds()               { go "http://www.lds.org/search?lang=eng&query=$(query $@)" ; }
-function scriptures()        { go "http://www.lds.org/search?lang=eng&query=$(query $@)&collection=scriptures" ; }
-function cpp()               { googleSearch "site:cplusplus.com/ $(argClip "$@")" ; }
-
 function html-header() { curl --head "$(argClip "$@")"; }
 
 ##############################
@@ -356,37 +349,10 @@ function html-header() { curl --head "$(argClip "$@")"; }
 ##############################
 ##############################
 
-alias gci='git commit'
-alias gco='git checkout'
-alias grb='git rebase -p'
-alias girb='git rebase -i'
-alias grb.abrt='git rebase --abort'
-alias grb.cont='git rebase --continue'
-alias grb.skip='git rebase --skip'
-
-alias gbr='git branch'
-alias gbr.stat='git branch -vv'
-alias gbr.create='git checkout -b --track'
-alias gbr.set-remote='git branch --set-upstream-to=origin/"$(git.branch)"'
-
-alias gmerge='git merge --no-ff'
-
-alias gfetch='git fetch -p'
-alias gpull='git pull'
-alias gpullr='git pull --rebase'
-alias gpush='git push origin "HEAD:$(git.branch)"'
-
-alias gadd='git add'
-
-alias glog='git log'
-alias gstat='git status'
-alias gdiff='git diff --ignore-space-at-eol'
-alias gshow='git show --ignore-space-at-eol'
-
-function git.describe () {
+function g.describe () {
     local git_dir repo branch
 
-    git_dir=$(git.root 2>/dev/null)
+    git_dir=$(g.root 2>/dev/null)
     if [ $? -ne 0 ]; then
         echo 'git:-'
         return
@@ -396,12 +362,12 @@ function git.describe () {
     if [ "$1" = '--short' ]; then
         echo "git:$repo"
     else
-        branch=$(git.branch)
+        branch=$(g.branch)
         printf "git:%s @ %s\n" "$repo" "$branch"
     fi
 }
 
-function git.root () {
+function g.root () {
     local git_dir
     git_dir=$(git rev-parse --git-dir 2>/dev/null)
     if [ $? -eq 0 ]; then
@@ -410,20 +376,64 @@ function git.root () {
         return $?
     fi
 }
+function g.root.cd () { cd "$(g.root)"; }
 
-function git.ammend() {
-    git commit --amend "$@"
+function g.add () { git add "$@"; }
+function g.rm () { git rm "$@"; }
+
+function g.ci () { git commit "$@"; }
+function g.ci.skip-checks () { git commit --no-verify "$@"; }
+function g.ci.ammend() { git commit --amend "$@"; }
+function g.ci.ammend.preserve-message() { g.ci.ammend --no-edit "$@"; }
+
+function g.co () { git checkout "$@"; }
+function g.co.main () { git checkout "$(g.branch.main)" "$@"; }
+
+function g.branch () { git branch "$@"; }
+function g.branch.name () { git symbolic-ref HEAD 2>/dev/null | sed -e 's/refs\/heads\///'; }
+function g.branch.main () {
+    local remote
+    remote=${1:-origin}
+    git rev-parse --abbrev-ref "$remote"/HEAD |
+	jq --raw-input --raw-output \
+	   --arg remote "$remote" \
+	   'split("\($remote)/")[1:]|join("\($remote)/")'
+}
+function g.branch.statuses () { git branch -vv; }
+function g.branch.reset-upstream () { git branch --set-upstream-to=origin/"$(g.branch.name)" "$@"; }
+function g.branch.create () { git checkout -b "$@"; }
+function g.branch.delete () { git branch -D "$@"; }
+function g.branch.delete.current () {
+    local to_delete
+    to_delete=$(g.branch.name)
+    git reset --hard HEAD && g.co.main && g.branch.delete "$to_delete"    
 }
 
-function git.ammend.preserve-message() {
-    git commit --amend --no-edit "$@"
+function g.cherry-pick () { git cherry-pick "$@"; }
+
+function g.rebase.interactive () { git rebase --interactive "$@"; }
+function g.rebase.skip () { git rebase --skip; }
+function g.rebase.abort () { git rebase --abort; }
+function g.rebase.continue () { git rebase --continue; }
+
+function g.log () { git log "$@"; }
+function g.log.only-changed-files () { git log --summary --name-only "$@"; }
+function g.log.lola () { g.log.tree --all "$@"; }
+function g.log.tree () {
+    git log --graph --pretty=format:'%C(red)%h%C(reset) %C(blue)%<(12)%ar%C(reset) %C(auto)%d %s' "$@"
 }
 
-function git.branch() {
-    git symbolic-ref HEAD 2>/dev/null | sed -e 's/refs\/heads\///'
-}
+function g.status() { git status "$@"; }
 
-function git.retag() {
+function g.diff () { git diff --ignore-space-at-eol "$@"; }
+function g.diff.staged () { g.diff --staged "$@"; }
+function g.diff.include-whitespace () { git diff "$@"; }
+
+function g.show () { git show --ignore-space-at-eol "$@"; }
+function g.show.only-changed-files () { git show --summary --name-only "$@"; }
+function g.show.include-whitespace () { git show "$@" ; }
+
+function g.retag() {
     local root=$(git root)
     if [ -n "$root" ]; then
         ( cd "$root" && ctags -a -e -f TAGS --tag-relative -R app lib vendor )
@@ -432,7 +442,7 @@ function git.retag() {
     fi
 }
 
-function git.upstream-url () {
+function g.upstream-url () {
     git remote get-url --push origin | \
         sed \
             -e 's_git@_https://_' \
@@ -440,47 +450,86 @@ function git.upstream-url () {
             -e 's_\.git$__'
 }
 
-function git.github() {
-    local url=$(git.upstream-url)
+function g.github() {
+    local url=$(g.upstream-url)
 
     if [ "x$url" != "x" ]; then
-        go "${url}/tree/$(git.branch)"
+        go "${url}/tree/$(g.branch)"
     else
         go "https://github.com/morgen-peschke?tab=repositories"
     fi
 }
 
-function git.github.pull-request.url () {
+function g.github.pull-request.url () {
     if [ "$1" ]; then
-        echo "$(git.upstream-url)/compare/$1...$(git.branch)?expand=1"
+        echo "$(g.upstream-url)/compare/$1...$(g.branch.name)?expand=1"
     else
-        echo "$(git.upstream-url)/pull/new/$(git.branch)"
+        echo "$(g.upstream-url)/pull/new/$(g.branch.name)"
     fi
 }
 
-function git.github.pull-request.create () {
-    open "$(git.github.pull-request.url "$@")"
+function g.github.pull-request.create () {
+    open "$(g.github.pull-request.url "$@")"
 }
 
-function git.github.commit.url () {
-    echo "$(git.upstream-url)/commits/$(git rev-parse HEAD)"
+function g.github.commit.url () {
+    echo "$(g.upstream-url)/commits/$(git rev-parse HEAD)"
 }
 
-function git.serve() {
+function g.serve() {
     git daemon --reuseaddr --base-path=. --export-all --verbose --informative-errors
 }
 
 # Note: cannot write to current server branch
-function git.serve.writable() {
+function g.serve.writable() {
     git daemon --reuseaddr --base-path=. --export-all --verbose --informative-errors --enable=receive-pack
 }
 
-function git.sync () {
-    git fetch -p "$@"
+function g.pull () { git pull "$@"; }
+function g.push () { git push origin "HEAD:$(g.branch.name)" "$@"; }
+function g.push.set-upstream () { g.push --set-upstream "$@"; }
+
+function g.fetch () { git fetch "$@"; }
+function g.sync () { git fetch -p "$@"; }
+function g.sync.pull () { g.sync && git pull; }
+function g.sync.branch {
+    local added_stash initial_branch target_branch retval
+    target_branch="$1"
+    initial_branch=$(g.branch.name)
+    if [[ $(git status --porcelain 2>/dev/null | wc -l) -eq 0 ]]; then
+	added_stash=true
+	git stash --include-untracked
+    else
+	added_stash=false
+    fi
+
+    g.sync && git checkout "$target_branch" && git pull
+    retval=$?
+    if [[ $retval -ne 0 ]]; then
+        >&2 printf \
+	    'Failed to sync %s (%s).\nPress [enter] to attempt to revert to branch %s or ^C to quit\n' \
+	    "$target_branch" "$retval" "$initial_branch"
+	read
+	git reset --hard HEAD
+    fi
+    git checkout "$initial_branch"
+    if [[ "$added_stash" = 'true' ]]; then
+	git stash pop
+    fi
+    return $retval
 }
 
-function git.sync.pull () {
-    git.sync && git pull
+function g.merge () { git merge --no-ff "$@"; }
+
+function g.stash.list () { git stash list "$@"; }
+function g.stash.drop () { git stash drop "$@"; }
+function g.stash.clear () { git stash clear "$@"; }
+function g.stash.push () { git stash push "$@"; }
+function g.stash.pop () { git stash pop "$@"; }
+function g.stash.pop.to-branch () { 
+    local branchName="$1"
+    shift
+    git stash branch "$branchName" "$@"; 
 }
 
 ##############################
@@ -491,8 +540,20 @@ function git.sync.pull () {
 ##############################
 ##############################
 
-function helpers.ruby.load () {
+function util.ruby.load () {
     source "$HOME"/.bash-config/language-specific-stuff/ruby
+}
+
+function util.scala.mill.regenerate-intellij () {
+    mill mill.scalalib.GenIdea/idea
+}
+
+function util.scala.mill.convert.sbt-dependency () {
+    \sed -E -e 's/" +(%+) +"/\1/g' -e 's/%/:/g' -e 's/^"/ivy"/g'
+}
+
+function util.scala.sbt.convert.mill-ivy-dependency () {
+    \sed -E -e 's/" +(%+) +"/\1/g' -e 's/%/:/g' -e 's/^"/ivy"/g'
 }
 
 ##############################
@@ -995,12 +1056,8 @@ alias gcal='go https://www.google.com/calendar/'
 alias gmail='go https://mail.google.com'
 alias gplus='go https://plus.google.com'
 
-alias g='googleSearch'
-alias gi='googleSearch-incognito'
-alias goi='go-incognito'
-
-alias weather='go "http://www.weather.com/weather/today/95037"'
-alias weathernow='go "http://www.weather.com/weather/right-now/95037"'
+alias weather='curl "http://www.weather.com/weather/today/95037"'
+alias weathernow='curl "http://www.weather.com/weather/right-now/95037"'
 
 ##### Lazy functiones
 alias ag-literal='ag -Qs'
