@@ -22,7 +22,7 @@ umask 0027
 PATH="${HOME}/.bash-config/local-bin:${HOME}/.bash-config/bin:${HOME}/.bash-config/current-platform-bin:${HOME}/bin:${PATH}:${HOME}/.cask/bin:${HOME}/go/bin"
 export PATH
 
-export SBT_OPTS="-XX:MaxMetaspaceSize=1024m -Xms512m -Xmx8G -XX:+CMSClassUnloadingEnabled -Duser.timezone=GMT"
+export SBT_OPTS="$SBT_OPTS -XX:MaxMetaspaceSize=1024m -Xms512m -Xmx8G -Duser.timezone=GMT"
 
 export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx8G"
 
