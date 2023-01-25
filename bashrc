@@ -68,18 +68,3 @@ bind Space:magic-space
 # http://samrowe.com/wordpress/advancing-in-the-bash-shell/
 # Check cheat sheet
 
-##############################
-##############################
-##
-## Todo list
-##
-##############################
-##############################
-
-if [[ "$(tty | cut -d'/' -f3 | head -c3)" != "tty" ]]; then
-    type verse-current >/dev/null 2>&1 && verse-current
-    if [ -x ~/bin/list ]; then
-	echo '     ========= Notes ======== '
-	list
-    fi
-fi
