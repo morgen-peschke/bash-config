@@ -26,6 +26,9 @@ FOO=
 declare -a BAR
 BAZ=false
 
+# This will store any arguments past a literal '--'
+declare -a POSITIONAL
+
 # Short option, expected to be empty or conform to the format '-$c'
 declare -rA OPT_SHORT=(
     [BAR]='-b'
@@ -113,42 +116,53 @@ options.dump() {
         printf '%q ' "${ref[@]}"
         printf '\n'
     done
+    printf '%s=' POSITIONAL
+    printf '%q ' "${POSITIONAL[@]}"
+    printf '\n'
 }
 
 options.parse() {
     local option opt_ref opt_needs_val opt_is_array
     while ((${#@})); do
-        unset -n opt_ref
-        opt_needs_val=false
-        opt_is_array=false
-        for option in "${OPTIONS[@]}"; do
-            if [[ ${OPT_SHORT[$option]-} ]] && [[ ${OPT_SHORT[$option]} = "$1" ]]; then
-                declare -n opt_ref="$option"
-                [[ ${OPT_METAVAR[$option]-} ]] && opt_needs_val=true
-                options.is-array "$option" && opt_is_array=true
-            elif [[ ${OPT_LONG[$option]-} ]] && [[ ${OPT_LONG[$option]} = "$1" ]]; then
-                declare -n opt_ref="$option"
-                options.is-array "$option" && opt_is_array=true
-                [[ ${OPT_METAVAR[$option]-} ]] && opt_needs_val=true
-            fi
-        done
-        if [[ -R opt_ref ]]; then
+        if [[ "$1" = '--' ]]; then
             shift
-            if [[ $opt_needs_val = false ]]; then
-                opt_ref=true
-            elif [[ $opt_is_array = true ]] && [[ ${1-} ]]; then
-                opt_ref+=("${1-}")
+            while ((${#@})); do
+                POSITIONAL+=("$1")
                 shift
-            elif [[ ${1-} ]]; then
-                opt_ref+="${1-}"
-                shift
-            fi
+            done
         else
-            printf >&2 'Unexpected argument at:'
-            printf >&2 ' %q' "$@"
-            printf >&2 '\n'
-            help.print
-            exit 68
+            unset -n opt_ref
+            opt_needs_val=false
+            opt_is_array=false
+            for option in "${OPTIONS[@]}"; do
+                if [[ ${OPT_SHORT[$option]-} ]] && [[ ${OPT_SHORT[$option]} = "$1" ]]; then
+                    declare -n opt_ref="$option"
+                    [[ ${OPT_METAVAR[$option]-} ]] && opt_needs_val=true
+                    options.is-array "$option" && opt_is_array=true
+                elif [[ ${OPT_LONG[$option]-} ]] && [[ ${OPT_LONG[$option]} = "$1" ]]; then
+                    declare -n opt_ref="$option"
+                    options.is-array "$option" && opt_is_array=true
+                    [[ ${OPT_METAVAR[$option]-} ]] && opt_needs_val=true
+                fi
+            done
+            if [[ -R opt_ref ]]; then
+                shift
+                if [[ $opt_needs_val = false ]]; then
+                    opt_ref=true
+                elif [[ $opt_is_array = true ]] && [[ ${1-} ]]; then
+                    opt_ref+=("${1-}")
+                    shift
+                elif [[ ${1-} ]]; then
+                    opt_ref+="${1-}"
+                    shift
+                fi
+            else
+                printf >&2 'Unexpected argument at:'
+                printf >&2 ' %q' "$@"
+                printf >&2 '\n'
+                help.print
+                exit 68
+            fi
         fi
     done
 
