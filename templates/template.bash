@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+if [[ "${TRACE-0}" == "1" ]]; then
+    set -o xtrace
+fi
+
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 ######################################################
@@ -77,17 +81,17 @@ __INFO_OPT_SHORT_WIDTH=$(printf '%s\n' '  ' "${OPT_SHORT[@]}" | wc -L)
 __INFO_OPT_LONG_WIDTH=$(printf '%s\n' "${OPT_LONG[@]}" | wc -L)
 __INFO_OPT_METAVAR_WIDTH=$(($(printf '%s\n' '       ' "${OPT_METAVAR[@]}" | wc -L) + 2))
 options.info() {
-    if [[ ${1:-} ]]; then
+    if [[ ${1-} ]]; then
         local sep=' ' metavar=
-        [[ "${OPT_SHORT[$1]:-}" ]] && [[ "${OPT_LONG[$1]:-}" ]] && sep=','
-        [[ "${OPT_METAVAR[$1]:-}" ]] && metavar="<${OPT_METAVAR[$1]}>"
+        [[ "${OPT_SHORT[$1]-}" ]] && [[ "${OPT_LONG[$1]-}" ]] && sep=','
+        [[ "${OPT_METAVAR[$1]-}" ]] && metavar="<${OPT_METAVAR[$1]}>"
 
         printf "%-${__INFO_OPT_SHORT_WIDTH}s%s %-${__INFO_OPT_LONG_WIDTH}s %-${__INFO_OPT_METAVAR_WIDTH}s   %s\n" \
-            "${OPT_SHORT[$1]:- }" \
+            "${OPT_SHORT[$1]- }" \
             "$sep" \
-            "${OPT_LONG[$1]:- }" \
+            "${OPT_LONG[$1]- }" \
             "$metavar" \
-            "${OPT_DESCRIPTION[$1]:- }"
+            "${OPT_DESCRIPTION[$1]- }"
     fi
 }
 
@@ -105,7 +109,7 @@ options.dump() {
     local option ref
     for option in "${OPTIONS[@]}"; do
         declare -n ref="$option"
-        printf '%s=' "$option"
+        printf '%s=' "${option}"
         printf '%q ' "${ref[@]}"
         printf '\n'
     done
@@ -118,25 +122,25 @@ options.parse() {
         opt_needs_val=false
         opt_is_array=false
         for option in "${OPTIONS[@]}"; do
-            if [[ ${OPT_SHORT[$option]:-} ]] && [[ ${OPT_SHORT[$option]} = "$1" ]]; then
+            if [[ ${OPT_SHORT[$option]-} ]] && [[ ${OPT_SHORT[$option]} = "$1" ]]; then
                 declare -n opt_ref="$option"
-                [[ ${OPT_METAVAR[$option]:-} ]] && opt_needs_val=true
+                [[ ${OPT_METAVAR[$option]-} ]] && opt_needs_val=true
                 options.is-array "$option" && opt_is_array=true
-            elif [[ ${OPT_LONG[$option]:-} ]] && [[ ${OPT_LONG[$option]} = "$1" ]]; then
+            elif [[ ${OPT_LONG[$option]-} ]] && [[ ${OPT_LONG[$option]} = "$1" ]]; then
                 declare -n opt_ref="$option"
                 options.is-array "$option" && opt_is_array=true
-                [[ ${OPT_METAVAR[$option]:-} ]] && opt_needs_val=true
+                [[ ${OPT_METAVAR[$option]-} ]] && opt_needs_val=true
             fi
         done
         if [[ -R opt_ref ]]; then
             shift
             if [[ $opt_needs_val = false ]]; then
                 opt_ref=true
-            elif [[ $opt_is_array = true ]]; then
-                opt_ref+=("${1:-}")
+            elif [[ $opt_is_array = true ]] && [[ ${1-} ]]; then
+                opt_ref+=("${1-}")
                 shift
-            else
-                opt_ref+="${1:-}"
+            elif [[ ${1-} ]]; then
+                opt_ref+="${1-}"
                 shift
             fi
         else
@@ -150,7 +154,7 @@ options.parse() {
 
     local die=false
     for option in "${OPTIONS[@]}"; do
-        if [[ -z "${!option:-}" ]]; then
+        if [[ -z "${!option-}" ]]; then
             printf 'Missing value for: '
             if [[ ${OPT_LONG[@]} ]]; then
                 printf '%s\n' "${OPT_LONG[$option]}"
