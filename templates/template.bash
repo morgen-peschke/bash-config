@@ -32,7 +32,7 @@ declare -rA OPT_DESCRIPTION=(
 )
 
 cli.options.help() {
-    printf 'Usage: %s <options>\n\n' "$0"
+    printf 'Usage: %s [<options...>] [-- <args...>] \n\n' "$0"
     cli.options.help-text
 }
 
