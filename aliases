@@ -343,10 +343,8 @@ function force-url() {
 
 function html-header() { curl --head "$(argClip "$@")"; }
 
-function curl.raw() { curl.json.bash false false "$@"; }
-function curl.json() { curl.json.bash true false "$@"; }
-function curl.raw.with-keys() { curl.json.bash false true "$@"; }
-function curl.json.with-keys() { curl.json.bash true true "$@"; }
+function curl.json() { curl.json.bash false "$@"; }
+function curl.json.with-keys() { curl.json.bash true "$@"; }
 
 ##############################
 ##############################
