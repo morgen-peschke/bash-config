@@ -283,10 +283,10 @@ function code.format.sql() {
 
 code.bash.init() {
     if [[ ${1:-} ]]; then
-        cp "~/.bash-config/templates/template.bash" "$1"
+        cp "$HOME/.bash-config/templates/template.bash" "$1"
         chmod 700 "$1"
     else
-        cat "~/.bash-config/templates/template.bash"
+        cat "$HOME/.bash-config/templates/template.bash"
     fi
 }
 
