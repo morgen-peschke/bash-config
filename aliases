@@ -343,9 +343,6 @@ function force-url() {
 
 function html-header() { curl --head "$(argClip "$@")"; }
 
-function curl.json() { curl.json.bash false "$@"; }
-function curl.json.with-keys() { curl.json.bash true "$@"; }
-
 ##############################
 ##############################
 ##
@@ -484,6 +481,17 @@ function g.github.commit.url() {
     echo "$(g.upstream-url)/commits/$(git rev-parse HEAD)"
 }
 
+function g.github.auth.reject() {
+    git credentials reject <<EOF
+protocol=https
+host=github.com
+EOF
+    git credentials reject <<EOF
+protocol=ssh
+host=github.com
+EOF
+}
+
 function g.serve() {
     git daemon --reuseaddr --base-path=. --export-all --verbose --informative-errors
 }
@@ -529,10 +537,10 @@ function g.sync.branch {
 
 function g.merge() { git merge --no-ff "$@"; }
 
+function g.stash () { git stash push "$@"; }
 function g.stash.list() { git stash list "$@"; }
 function g.stash.drop() { git stash drop "$@"; }
 function g.stash.clear() { git stash clear "$@"; }
-function g.stash.push() { git stash push "$@"; }
 function g.stash.pop() { git stash pop "$@"; }
 function g.stash.pop.to-branch() {
     local branchName="$1"

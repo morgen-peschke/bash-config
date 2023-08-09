@@ -1,14 +1,38 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-#set -x
+
+if [[ "${TRACE-0}" == "1" ]]; then
+    set -o xtrace
+fi
+
+source "$HOME/.bash-config/templates/cli-option.utils.bash"
+
+# Define Options
+INCLUDE_KEYS=false
+
+declare -rA OPT_SHORT=()
+declare -rA OPT_LONG=(
+    [INCLUDE_KEYS]='--include-keys'
+)
+declare -rA OPT_METAVAR=()
+declare -rA OPT_DESCRIPTION=(
+    [INCLUDE_KEYS]='Include the raw keys provided by curl in the output'
+)
+
+cli.options.help() {
+    printf 'Usage: %s [<options...>] -- <curl args...>\n\n' "$0"
+    cli.options.help-text
+}
+
+cli.options.load "$@"
 
 args.process-data-argument() {
     if [[ '-' = "$1" ]]; then
         printf '%s' '"<stdin>"'
     elif [[ $(cut -c1 <<<"$1") = '@' ]]; then
-        jq --compact-output --raw-input 'try fromjson catch .' "$(cut -c2- "$1")"
+        jq --compact-output --raw-input --slurp 'fromjson? // .' "$(cut -c2- "$1")"
     else
-        jq --compact-output --raw-input 'try fromjson catch .' <<<"$1"
+        jq --compact-output --raw-input --slurp 'fromjson? // .' <<<"$1"
     fi
 }
 
@@ -77,54 +101,94 @@ response.extract.headers() {
 }
 
 response.extract.body() {
-    local responseLines="$1"
-    local rawBody parsedBody
-    rawBody=$(extract.line -3 "$responseLines")
-    jq <<<"$rawBody" --compact-output \
-        '{raw: ., parsed: (try fromjson catch .)}'
+    local responseLines="$1" keys="$2"
+    local rawBody firstBodyLine
+    # See lastHeaderLine in response.extract.headers
+    firstBodyLine=$(jq --raw-output --compact-output '.num_headers | tonumber | . + 2' <<<"$keys")
+    rawBody=$(jq --compact-output --argjson firstBodyLine "$firstBodyLine" '.[$firstBodyLine:-2]' <<<"$responseLines")
+    case "$rawBody" in
+    'null')
+        jq --null-input --compact-output '{raw: null, parsed: null }'
+        ;;
+    ''|'[]')
+        jq --null-input --compact-output '{raw: "", parsed: null }'
+        ;;
+    *)
+        jq <<<"$rawBody" --compact-output \
+            '{
+                raw: ., 
+                parsed: (reduce .[] as $i (""; . + $i) | fromjson? // .)
+            }'
+        ;;
+    esac
 }
 
 __curl() {
-    local curlArgs includeKeys responseLines status body keys rawHeaders headers keysArg reqSummary requestId requestBody
+    local curlArgs responseLines status body keys rawHeaders headers keysArg reqSummary requestId requestBody before_ts after_ts
     requestId="morgen-$(uuidgen | tr A-Z a-z | tr -d '\n')"
-    includeKeys="$1"
-    shift
     requestBody=$(args.extract.requestBody "$@")
-    curlArgs=(--silent --show-error -H "X-Request-Id: ${requestId}" -iw '\n%{json}\n' "$@")
-    responseLines=$(curl.returningLines "${curlArgs[@]}")
+    before_ts=$(jq --null-input 'now')
+    curlArgs=(--silent --show-error -H "X-Request-Id: ${requestId}" "$@")
+    responseLines=$(curl.returningLines -iw '\n%{json}\n' "${curlArgs[@]}")
+    after_ts=$(jq --null-input 'now')
     status=$(extract.line 0 "$responseLines")
     keys=$(extract.line -2 "$responseLines" raw)
     headers=$(response.extract.headers "$responseLines" "$keys")
-    body=$(response.extract.body "$responseLines")
+    body=$(response.extract.body "$responseLines" "$keys")
     reqSummary=$(output.build.summary "$keys" "$requestBody" "${curlArgs[@]}")
 
-    if [[ "$includeKeys" = 'true' ]]; then
+    if [[ "$INCLUDE_KEYS" = 'true' ]]; then
         keysArg="$keys"
     else
-        keysArg=null
+        keysArg='null'
     fi
 
-    result=$(jq --null-input \
+    result=$(jq 2>/dev/null \
+        --null-input \
         --argjson body "$body" \
         --argjson keys "$keysArg" \
         --argjson headers "$headers" \
         --argjson status "$status" \
         --argjson request "$reqSummary" \
+        --argjson beforeTs "$before_ts" \
+        --argjson afterTs "$after_ts" \
         --arg requestId "$requestId" \
-        '{request: $request, requestId: $requestId, status: $status, keys: $keys, headers: $headers.parsed, body: $body.parsed}' 2>/dev/null || true)
+        '{
+            request: $request, 
+            requestId: $requestId, 
+            status: $status,
+            timing: {
+                beforeTs: $beforeTs,
+                afterTs: $afterTs,
+                durationCap_sec: ($afterTs - $beforeTs)
+            },
+            keys: $keys,
+            headers: $headers.parsed, 
+            body: ($body.parsed // $body.raw)
+        }' || true)
     if [[ $result ]]; then
         printf '%s\n' "$result"
     else
-        jq >&2 --null-input \
+        jq >&2 \
+            --null-input \
             --argjson body "$body" \
             --argjson keys "$keysArg" \
             --argjson headers "$headers" \
             --argjson status "$status" \
             --argjson request "$reqSummary" \
             --arg requestId "$requestId" \
-            '{request: $request, requestId: $requestId, status: $status, keys: $keys, headers: $headers, body: $body}'
+            --argjson lines "$responseLines" \
+            '{
+                request: $request, 
+                requestId: $requestId, 
+                status: $status, 
+                keys: $keys, 
+                headers: $headers, 
+                body: $body,
+                lines: $lines
+            }'
         printf '%s\n' '{}'
     fi
 }
 
-__curl "$@"
+__curl "${POSITIONAL[@]}"

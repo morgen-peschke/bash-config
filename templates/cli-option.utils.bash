@@ -112,6 +112,9 @@ __cli.options.parse() {
                 POSITIONAL+=("$1")
                 shift
             done
+        elif [[ "$1" = '--help' ]]; then
+            cli.options.help
+            exit 68
         else
             unset -n opt_ref
             opt_needs_val=false
