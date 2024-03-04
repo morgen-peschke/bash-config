@@ -85,6 +85,8 @@ function launchctl-reload()
 function xcopy () { pbcopy "$@"; }
 function xpaste () { pbpaste "$@"; }
 alias lockscreen='pmset displaysleepnow'
+
+# Source: https://apple.stackexchange.com/a/346992
 function util.used-ports () {
   netstat -Watnlv |
    ag -Qs LISTEN |
