@@ -1030,7 +1030,7 @@ _jwt.decode_base64() {
 jwt.decode() {
     cut -d'.' -f-2 |
         tr '.' "\n" |
-        _jwt.decode_base64_url |
+        _jwt.decode_base64 |
         jq 'def render(x): if .[x] then .[x+"Str"] = (.[x]|todate) else . end;
             def addRendered: render("iat") | render("exp") | render("nbf");
             {header: .header, footer: .footer|addRendered}'
