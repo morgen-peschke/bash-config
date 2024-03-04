@@ -438,15 +438,6 @@ function g.show() { git show --ignore-space-at-eol "$@"; }
 function g.show.only-changed-files() { git show --summary --name-only "$@"; }
 function g.show.include-whitespace() { git show "$@"; }
 
-function g.retag() {
-    local root=$(git root)
-    if [ -n "$root" ]; then
-        (cd "$root" && ctags -a -e -f TAGS --tag-relative -R app lib vendor)
-    else
-        return 1
-    fi
-}
-
 function g.upstream-url() {
     git remote get-url --push origin |
         sed \
@@ -473,8 +464,12 @@ function g.github.pull-request.url() {
     fi
 }
 
-function g.github.pull-request.create() {
+function g.github.pull-request.create.skip-push() {
     open "$(g.github.pull-request.url "$@")"
+}
+
+function g.github.pull-request.create () {
+    g.push.set-upstream && open "$(g.github.pull-request.url "$@")"
 }
 
 function g.github.commit.url() {
@@ -503,10 +498,12 @@ function g.serve.writable() {
 
 function g.pull() { git pull "$@"; }
 function g.push() { git push origin "HEAD:$(g.branch.name)" "$@"; }
+function g.push.tags() { git push --tags origin "$@"; }
 function g.push.set-upstream() { g.push --set-upstream "$@"; }
 
 function g.fetch() { git fetch "$@"; }
-function g.sync() { git fetch -p "$@"; }
+function g.fetch.include-tags() { git fetch --tags "$@"; }
+function g.sync() { git fetch --prune --prune-tags "$@"; }
 function g.sync.pull() { g.sync && git pull; }
 function g.sync.branch {
     local added_stash initial_branch target_branch retval
@@ -547,6 +544,8 @@ function g.stash.pop.to-branch() {
     shift
     git stash branch "$branchName" "$@"
 }
+
+function g.clean.nuke-everything () { git clean -xdf "$@"; }
 
 ##############################
 ##############################
