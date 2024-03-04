@@ -450,9 +450,9 @@ function g.github() {
     local url=$(g.upstream-url)
 
     if [ "x$url" != "x" ]; then
-        go "${url}/tree/$(g.branch)"
+        open "${url}/tree/$(g.branch)"
     else
-        go "https://github.com/morgen-peschke?tab=repositories"
+        open "https://github.com/morgen-peschke?tab=repositories"
     fi
 }
 
@@ -1064,10 +1064,10 @@ function shelp() { sl help "$@"; }
 function sinfo() { st info "$@"; }
 
 ##### Web functiones
-alias gdocs='go drive.google.com'
-alias gcal='go https://www.google.com/calendar/'
-alias gmail='go https://mail.google.com'
-alias gplus='go https://plus.google.com'
+alias gdocs='open drive.google.com'
+alias gcal='open https://www.google.com/calendar/'
+alias gmail='open https://mail.google.com'
+alias gplus='open https://plus.google.com'
 
 alias weather='curl "http://www.weather.com/weather/today/95037"'
 alias weathernow='curl "http://www.weather.com/weather/right-now/95037"'
