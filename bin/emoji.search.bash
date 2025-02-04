@@ -31,7 +31,7 @@ function main () {
             emoji-definitions
             ;;
         *)
-      emoji-definitions | fzf -0 -m --preview="$PREVIEW_COMMAND" | render
+      emoji-definitions | fzf --exit-0 --multi --preview="$PREVIEW_COMMAND" | render
     esac
 }
 
