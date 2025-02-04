@@ -169,6 +169,12 @@ function util.find.non-ascii() {
     ag '[^\x00-\x7F]' "$@"
 }
 
+function util.find.non-ascii.filenames () {
+    local root="$1"
+    shift
+    LC_ALL=C find "$root" -name '*[! -~]*' "$@"
+}
+
 # Prints the top 20 disk space hogs in the current directory
 function util.dirsize() {
     local root="$1/"
