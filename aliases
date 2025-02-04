@@ -388,9 +388,10 @@ function g.root.cd() { cd "$(g.root)"; }
 
 function g.add() { git add "$@"; }
 function g.rm() { git rm "$@"; }
+function g.restore.staged() { git restore --staged "$@"; }
 
 function g.ci() { git commit "$@"; }
-function g.ci.skip-checks() { git commit --no-verify "$@"; }
+function g.ci.no-verify() { git commit --no-verify "$@"; }
 function g.ci.ammend() { git commit --amend "$@"; }
 function g.ci.ammend.preserve-message() { g.ci.ammend --no-edit "$@"; }
 
