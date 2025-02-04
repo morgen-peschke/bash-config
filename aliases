@@ -578,6 +578,15 @@ function util.scala.sbt.convert.mill-ivy-dependency() {
     \sed -E -e 's/" +(%+) +"/\1/g' -e 's/%/:/g' -e 's/^"/ivy"/g'
 }
 
+# Source: https://superuser.com/a/1019853
+function util.scala.unicode.to-literal () {
+    tr -d '\n'               | # Drop trailing newline                          \
+    iconv -f utf8 -t utf32be | # UTF-32 big-endian happens to be the code point \
+    xxd -p                   | # -p just give me the plain hex                  \
+    sed -r 's/^0+/0x/'       | # remove leading 0's, replace with 0x            \
+    xargs printf '\\u%04X\n'   # pretty print the code point
+}
+
 ##############################
 ##############################
 ##
