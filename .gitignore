@@ -33,3 +33,4 @@ tramp
 
 # Local, non-VCS helpers
 local-rc
+local-profile
