@@ -23,8 +23,6 @@ PATH="${HOME}/.bash-config/local-bin:${HOME}/.bash-config/bin:${HOME}/.bash-conf
 export PATH
 
 SBT_OPTS="$SBT_OPTS -Duser.timezone=GMT -XX:+UseG1GC -Xmx4g"
-SBT_OPTS="${SBT_OPTS##+( )}"
-export SBT_OPTS
 
 ##############################
 ##############################
