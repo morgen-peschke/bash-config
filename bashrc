@@ -22,9 +22,9 @@ umask 0027
 PATH="${HOME}/.bash-config/local-bin:${HOME}/.bash-config/bin:${HOME}/.bash-config/current-platform-bin:${HOME}/bin:${PATH}:${HOME}/.cask/bin:${HOME}/go/bin"
 export PATH
 
-export SBT_OPTS=$(sed 's/^ //' <<< "$SBT_OPTS -Duser.timezone=GMT")
-
-export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx8G"
+SBT_OPTS="$SBT_OPTS -Duser.timezone=GMT -XX:+UseG1GC -Xmx4g"
+SBT_OPTS="${SBT_OPTS##+( )}"
+export SBT_OPTS
 
 ##############################
 ##############################
@@ -67,4 +67,3 @@ bind Space:magic-space
 # Dynamically expand history commands
 # http://samrowe.com/wordpress/advancing-in-the-bash-shell/
 # Check cheat sheet
-
