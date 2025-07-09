@@ -5,6 +5,7 @@
 	editor = eclient
         pager = less -S
 	hooksPath = /Users/morgen/development/global-hooks/
+	excludesFile = /Users/morgen/.bash-config/gitignore
 [alias]
 	unstage = reset HEAD --
 	root = !pwd
