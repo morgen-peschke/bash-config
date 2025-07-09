@@ -953,6 +953,10 @@ function atlassian.headers.evidence-of-dev-test-comment() {
 ##############################
 ##############################
 
+function markdown.tasks.to-regular-list () {
+    sed -E -e 's_\[ \]__g'
+}
+
 function __markdown.url.format() {
     local url="$1"
     shift
