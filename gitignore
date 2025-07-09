@@ -1,0 +1,10 @@
+# -*- mode: gitignore; -*-
+# Note: this is the global gitignore file
+
+*~
+.\#*
+.DS_Store
+.vscode/
+.idea/
+.bsp/
+*.elc
