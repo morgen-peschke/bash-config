@@ -567,7 +567,11 @@ function util.ruby.load() {
 }
 
 function util.scala.mill.regenerate-intellij() {
-    mill mill.scalalib.GenIdea/idea
+    if [[ -e ./mill ]]; then
+        ./mill mill.idea.GenIdea/
+    else
+        mill mill.scalalib.GenIdea/idea
+    fi
 }
 
 function util.scala.mill.convert.sbt-dependency() {
